@@ -1,9 +1,30 @@
 OpenRental
 Copyright 2026 OpenRental Contributors
 
-This product includes software developed as an in-house equipment rental
-system and released under the Apache License, Version 2.0.
+Licensed under the Apache License, Version 2.0. See LICENSE.
 
 All company names, contact details, customer records and pricing figures that
 appear anywhere in this repository — in seeds, fixtures, tests, screenshots or
 documentation — are fictional. No real customer data is included.
+
+--------------------------------------------------------------------------------
+Bundled fonts
+
+This distribution includes font files licensed under the SIL Open Font License,
+Version 1.1, not the Apache License. The full OFL text is in
+licenses/OFL-1.1.txt.
+
+  Great Vibes  (server/assets/fonts/GreatVibes-Regular.ttf)
+    Copyright 2010 The Great Vibes Project Authors
+    https://github.com/googlefonts/great-vibes
+    Used to render signatures on generated contract PDFs.
+
+  Noto Sans SC  (server/assets/fonts/NotoSansSC-Regular.ttf,
+                 client/public/fonts/NotoSansSC-Regular.ttf)
+    Copyright The Noto Project Authors
+    https://github.com/notofonts/noto-cjk
+    Provides Simplified Chinese glyphs in generated PDFs and in the UI.
+
+The OFL permits bundling and redistribution with software. It does not permit
+selling the fonts on their own, and any modified version must not use the
+Reserved Font Names above.

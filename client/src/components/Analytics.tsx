@@ -1,12 +1,11 @@
 import { useEffect, useRef } from "react";
 
-// GA4 measurement ID for the live "OpenRental" property. Measurement IDs are
-// public (exposed in client JS to every visitor), so hardcoding the default is fine
-// and means analytics works on deploy with no env setup. Override with VITE_GA4_ID.
-const GA_ID = (import.meta.env.VITE_GA4_ID as string | undefined) || "REDACTED-GA4-ID";
+// GA4 measurement ID. Deliberately has no default: a hardcoded one would send
+// every self-hoster's traffic into somebody else's analytics property. Unset
+// means gtag is never loaded at all.
+const GA_ID = (import.meta.env.VITE_GA4_ID as string | undefined) || "";
 
-// Skip tracking on localhost — covers `npm run dev` and the build-time prerender
-// (both load the app from localhost), so neither pollutes the live GA property.
+// Skip tracking on localhost, so `npm run dev` never pollutes a real property.
 function isLocalHost(): boolean {
   const h = typeof window !== "undefined" ? window.location.hostname : "";
   return h === "localhost" || h === "127.0.0.1" || h === "" || h.endsWith(".local");

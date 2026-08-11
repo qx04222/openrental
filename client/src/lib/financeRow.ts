@@ -114,7 +114,7 @@ function formatWeChatDate(value: unknown): string {
  *   Add: 159 Coons Rd, Richmond Hill, ON L4E 2P7
  *   Tel: 555-010-0300
  *   Del Time: 6/22/2026
- *   Machine: ER620H (1day)
+ *   Machine: NX-25 (1day)
  *   SN: <serial>
  *   Note: Delivery
  */

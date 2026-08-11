@@ -16,7 +16,6 @@
 -- PostgreSQL database dump
 --
 
-\restrict 4StPz1PVEf9mNAkps12OJVyPcIToUW11OoWeQg54xbn0p7jUvkRVVOfybo8cGw9
 
 -- Dumped from database version 17.6
 -- Dumped by pg_dump version 18.4
@@ -3145,5 +3144,4 @@ ALTER TABLE public.work_orders ENABLE ROW LEVEL SECURITY;
 -- PostgreSQL database dump complete
 --
 
-\unrestrict 4StPz1PVEf9mNAkps12OJVyPcIToUW11OoWeQg54xbn0p7jUvkRVVOfybo8cGw9
 

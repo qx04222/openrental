@@ -35,7 +35,7 @@ const emptyOrderForm = {
   customerId: "", customerName: "", customerEmail: "", customerPhone: "", customerCompany: "",
   customerDiscountPercent: "", customerCreditLimit: "",
   // Equipment is chosen by CATEGORY (e.g. "2 Ton Mini Excavator") — one entry per
-  // category even when it spans several brand-models (ER620H + AX18). The system
+  // category even when it spans several brand-models (NX-25 + CW-70). The system
   // then auto-assigns any available unit in the category. equipmentModelId holds a
   // representative model of the category (for rate/label lookup).
   equipmentCategory: "",
@@ -499,7 +499,7 @@ export default function RentalManagement() {
   };
 
   // Equipment is picked by CATEGORY, not by brand-model. Several brand-models can
-  // share one category (e.g. "2 Ton Mini Excavator" = SDLG ER620H + ARCPATH AX18);
+  // share one category (e.g. "2 Ton Mini Excavator" = Northline NX-25 + Cedarworks CW-70);
   // they're interchangeable for rental, so the dropdown shows ONE entry per
   // category with combined availability — matching the category-pricing page — and
   // the system auto-assigns any available unit in that category.

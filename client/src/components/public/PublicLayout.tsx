@@ -135,7 +135,7 @@ export default function PublicLayout({ children }: { children: ReactNode }) {
         <div className="border-t border-white/10">
           <div className="max-w-6xl mx-auto px-4 py-5 text-xs text-slate-500 flex flex-col sm:flex-row items-center justify-between gap-2">
             <span>© {branding.companyName}. {t("footer.rights")}</span>
-            <span className="uppercase tracking-widest">SDLG · ARCPATH · LGMG</span>
+            <span className="uppercase tracking-widest">{branding.companyName}</span>
           </div>
         </div>
       </footer>

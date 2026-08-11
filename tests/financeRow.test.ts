@@ -38,12 +38,12 @@ function makeOrder(
       adminNotes: "Pallet fork",
       ...overrides,
     },
-    rental_fleet: { brand: "Generic", model: "ER627H", assetNumber: "#10", serialNumber: "SN-9988" },
+    rental_fleet: { brand: "Generic", model: "NX-27", assetNumber: "#10", serialNumber: "SN-9988" },
     customers: { name: "Acme Co" },
     _export: {
       orderNumber: "SOT12269", // financialOrderNumber || rentalNumber
       days: 9,
-      machineModel: "ER627H", // model only, no brand
+      machineModel: "NX-27", // model only, no brand
       deliveryMethodLabel: "Delivery",
       ...exportOverrides,
     },
@@ -148,7 +148,7 @@ describe("buildWeChatDispatch", () => {
         "Add: 1 King St, Toronto",
         "Tel: 416-555-1212",
         "Del Time: 7/1/2026", // Toronto-anchored M/D/YYYY, no leading zeros
-        "Machine: ER627H (9days)",
+        "Machine: NX-27 (9days)",
         "SN: SN-9988",
         "Note: Delivery",
       ].join("\n"),
@@ -156,8 +156,8 @@ describe("buildWeChatDispatch", () => {
   });
 
   it("uses the singular '1day' and includes the equipment serial number", () => {
-    const out = buildWeChatDispatch(makeOrder({}, { days: 1, machineModel: "ER620H" }));
-    expect(out).toContain("Machine: ER620H (1day)");
+    const out = buildWeChatDispatch(makeOrder({}, { days: 1, machineModel: "NX-25" }));
+    expect(out).toContain("Machine: NX-25 (1day)");
     expect(out).toContain("SN: SN-9988");
   });
 
@@ -177,6 +177,6 @@ describe("buildWeChatDispatch", () => {
     (order.rental_fleet as Record<string, unknown>).serialNumber = null;
     const out = buildWeChatDispatch(order);
     expect(out).not.toMatch(/^SN:/m);
-    expect(out).toContain("Machine: ER627H (9days)");
+    expect(out).toContain("Machine: NX-27 (9days)");
   });
 });

@@ -1,6 +1,6 @@
 """Focused real-browser check for the category-merge fix.
 
-A category that spans TWO brand-models (e.g. SDLG ER620H + ARCPATH AX18) must
+A category that spans TWO brand-models (e.g. Northline NX-25 + Cedarworks CW-70) must
 appear as ONE entry in the order-form equipment dropdown — with the availability
 of BOTH models combined — and an order must auto-assign any unit in the category.
 Seed is created by run-category-merge.sh.

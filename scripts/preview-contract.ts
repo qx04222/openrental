@@ -23,8 +23,8 @@ const company = { companyName: "OpenRental", repName: "Xin Qi", repTitle: "Autho
 const variables: Record<string, string> = {
   companyName: company.companyName,
   customerName: "Acme Construction Ltd.",
-  equipmentDescription: "SDLG E660F Excavator",
-  equipmentSerial: "SDLGE660F-2024-0173",
+  equipmentDescription: "Northline NX-38 Excavator",
+  equipmentSerial: "DEMO-NX38-0173",
   startDate: "June 5, 2026",
   endDate: "July 3, 2026",
   deliveryAddress: "120 Industrial Pkwy, Aurora, ON",

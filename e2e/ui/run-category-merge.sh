@@ -32,10 +32,10 @@ for _ in $(seq 1 60); do curl -sf "http://localhost:${PORT}/" >/dev/null 2>&1 &&
 from harness import api_admin, trpc
 a = api_admin()
 trpc(a, 'equipmentCategories.create', {'name': '双品牌2吨挖机'})
-trpc(a, 'equipmentModels.create', {'category': '双品牌2吨挖机', 'brand': 'SDLG', 'model': 'ER620X', 'dailyRate': '280.00', 'weeklyRate': '1400.00', 'equipmentType': 'machine'})
-trpc(a, 'equipmentModels.create', {'category': '双品牌2吨挖机', 'brand': 'ARCPATH', 'model': 'AX18X', 'dailyRate': '280.00', 'weeklyRate': '1400.00', 'equipmentType': 'machine'})
-trpc(a, 'rentalFleet.create', {'brand': 'SDLG', 'model': 'ER620X', 'category': '双品牌2吨挖机', 'serialNumber': 'CM-SDLG-1', 'currentStatus': 'available'})
-trpc(a, 'rentalFleet.create', {'brand': 'ARCPATH', 'model': 'AX18X', 'category': '双品牌2吨挖机', 'serialNumber': 'CM-ARC-1', 'currentStatus': 'available'})
+trpc(a, 'equipmentModels.create', {'category': '双品牌2吨挖机', 'brand': 'Northline', 'model': 'NX-25X', 'dailyRate': '280.00', 'weeklyRate': '1400.00', 'equipmentType': 'machine'})
+trpc(a, 'equipmentModels.create', {'category': '双品牌2吨挖机', 'brand': 'Cedarworks', 'model': 'CW-70X', 'dailyRate': '280.00', 'weeklyRate': '1400.00', 'equipmentType': 'machine'})
+trpc(a, 'rentalFleet.create', {'brand': 'Northline', 'model': 'NX-25X', 'category': '双品牌2吨挖机', 'serialNumber': 'CM-NL-1', 'currentStatus': 'available'})
+trpc(a, 'rentalFleet.create', {'brand': 'Cedarworks', 'model': 'CW-70X', 'category': '双品牌2吨挖机', 'serialNumber': 'CM-CW-1', 'currentStatus': 'available'})
 print('fixture ok')
 PY
 )

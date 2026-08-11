@@ -54,7 +54,6 @@
   "sidebar.auditLog": "Audit Log",
   "sidebar.recycleBin": "Recycle Bin",
   "sidebar.settings": "Settings",
-  "sidebar.seldomUsed": "Seldom used",
   "sidebar.systemSettings": "System & Settings",
   "systemSettings.subtitle": "Administration, configuration, users and system tools.",
   "systemSettings.pickHint": "Select an item on the left to begin.",

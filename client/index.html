@@ -3,47 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#1C1917" />
-    <title>OpenRental Equipment Rental — Excavators, Loaders & Lifts | GTA</title>
-    <meta name="description" content="OpenRental rents SDLG excavators & wheel loaders, ARCPATH compact track loaders and LGMG boom & scissor lifts across the Greater Toronto Area — daily, weekly and monthly rates with delivery." />
-    <meta name="robots" content="index, follow" />
-    <!-- Canonical/social base: update if the public domain changes (also VITE_APP_URL). -->
-    <link rel="canonical" href="https://demo.openrental.example/" />
-    <meta property="og:type" content="website" />
-    <meta property="og:site_name" content="OpenRental Equipment Rental" />
-    <meta property="og:title" content="OpenRental Equipment Rental — GTA Construction Equipment" />
-    <meta property="og:description" content="Excavators, wheel loaders, compact track loaders and boom & scissor lifts for rent across the GTA. Daily, weekly and monthly rates with delivery." />
-    <meta property="og:url" content="https://demo.openrental.example/" />
-    <meta property="og:image" content="https://demo.openrental.example/og-cover.png" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="OpenRental Equipment Rental — GTA Construction Equipment" />
-    <meta name="twitter:description" content="Excavators, loaders and lifts for rent across the Greater Toronto Area. Daily, weekly and monthly rates with delivery." />
-    <meta name="twitter:image" content="https://demo.openrental.example/og-cover.png" />
+    <meta name="theme-color" content="#1F2937" />
+    <title>OpenRental</title>
+    <meta name="description" content="Self-hostable equipment rental management: fleet ledger, order lifecycle, pricing, invoicing and deposits." />
+    <!-- This is an operations system, not a public website: nothing here should
+         be indexed, and there is no marketing surface to optimise for. -->
+    <meta name="robots" content="noindex, nofollow" />
+
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&family=Inter:wght@400;500;600&family=Archivo:wght@600;700;800;900&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-    <!-- Manifest is injected server-side based on URL prefix (admin/field/portal).
-         Public marketing routes get no manifest, so the browser does not offer
-         install on /, /rent-equipment, etc. -->
+
+    <!-- Manifest and apple-touch-icon are injected server-side per audience
+         (admin / field / portal), so each installed PWA gets its own badge. -->
     <!--MANIFEST-->
     <link rel="icon" type="image/png" href="/admin-icons/icon-192.png" />
-    <!-- The per-audience apple-touch-icon is injected server-side at the manifest
-         placeholder above, so each installed PWA gets its own home-screen badge
-         (admin/portal = car, field inspector = clipboard). Public routes fall back
-         to the favicon above. -->
-    <!-- Google Search Console ownership verification (URL-prefix property demo.openrental.example). -->
-    <meta name="google-site-verification" content="REDACTED-GSC-TOKEN" />
-    <!-- Set the brand surface before React mounts so customer-facing routes
-         paint in the OpenRental standalone-site theme with no flash. Mirrors
-         isPublicSurface() in App.tsx. -->
+
+    <!-- Pick the brand surface before React mounts so customer-facing routes
+         paint without a flash. Mirrors isPublicSurface() in App.tsx. -->
     <script>
       (function () {
         var p = location.pathname;
-        var pub = p === "/" || ["/rent-equipment", "/rental-request", "/rental-status", "/checkout", "/contact", "/portal", "/mini-excavator-rental", "/scissor-lift-rental", "/compact-track-loader-rental"].some(function (x) {
-          return p === x || p.indexOf(x + "/") === 0 || p.indexOf(x) === 0;
+        var pub = ["/rental-request", "/rental-status", "/checkout", "/portal"].some(function (x) {
+          return p === x || p.indexOf(x + "/") === 0;
         });
         document.documentElement.dataset.surface = pub ? "public" : "admin";
       })();
@@ -51,47 +34,6 @@
   </head>
   <body>
     <div id="root"></div>
-    <!-- Site-level structured data. Kept in <body> (not <head>) so the SPA's
-         per-page <Seo> JSON-LD doesn't duplicate it during hydration, and so
-         non-JS crawlers/social scrapers still get Organization + LocalBusiness. -->
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "LocalBusiness",
-        "@id": "https://demo.openrental.example/#business",
-        "name": "OpenRental Equipment Rental",
-        "image": "https://demo.openrental.example/hero-equipment.webp",
-        "logo": "https://demo.openrental.example/logo.png",
-        "url": "https://demo.openrental.example/",
-        "telephone": "+1-555-010-0100",
-        "email": "rentals@openrental.example",
-        "priceRange": "$$",
-        "address": {
-          "@type": "PostalAddress",
-          "streetAddress": "100 Example Ave",
-          "addressLocality": "Toronto",
-          "addressRegion": "ON",
-          "postalCode": "M5V 0A1",
-          "addressCountry": "CA"
-        },
-        "geo": { "@type": "GeoCoordinates", "latitude": 43.8232, "longitude": -79.2883 },
-        "areaServed": { "@type": "City", "name": "Greater Toronto Area" },
-        "sameAs": ["https://www.instagram.com/openrental.inc/"],
-        "openingHoursSpecification": [
-          { "@type": "OpeningHoursSpecification", "dayOfWeek": ["Monday","Tuesday","Wednesday","Thursday","Friday"], "opens": "08:00", "closes": "17:00" },
-          { "@type": "OpeningHoursSpecification", "dayOfWeek": "Saturday", "opens": "09:00", "closes": "14:00" }
-        ],
-        "hasOfferCatalog": {
-          "@type": "OfferCatalog",
-          "name": "Equipment Rental",
-          "itemListElement": [
-            { "@type": "OfferCatalog", "name": "Mini Excavator Rental", "url": "https://demo.openrental.example/mini-excavator-rental" },
-            { "@type": "OfferCatalog", "name": "Scissor Lift Rental", "url": "https://demo.openrental.example/scissor-lift-rental" },
-            { "@type": "OfferCatalog", "name": "Compact Track Loader Rental", "url": "https://demo.openrental.example/compact-track-loader-rental" }
-          ]
-        }
-      }
-    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

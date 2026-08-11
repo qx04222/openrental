@@ -19,9 +19,9 @@ describe("Rental Management search", () => {
       endDate: "2026-04-30T00:00:00.000Z",
     },
     rental_fleet: {
-      brand: "SDLG",
-      model: "ER627H",
-      serialNumber: "E627-1",
+      brand: "Northline",
+      model: "NX-27",
+      serialNumber: "NX27-1",
       assetNumber: "FLEET-059",
       category: "Mini Excavator",
     },
@@ -35,8 +35,8 @@ describe("Rental Management search", () => {
 
     for (const expected of [
       "25", "#25", "20260506TA", "SOT12701", "A&J Canada Construction Inc.",
-      "dispatch@example.com", "416-555-0125", "2 Ton Mini Excavator", "SDLG",
-      "ER627H", "E627-1", "FLEET-059", "Mini Excavator", "completed", "已完成",
+      "dispatch@example.com", "416-555-0125", "2 Ton Mini Excavator", "Northline",
+      "NX-27", "NX27-1", "FLEET-059", "Mini Excavator", "completed", "已完成",
       "2026/04/29", "2026/04/30",
     ]) {
       expect(text).toContain(expected);

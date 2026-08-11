@@ -5,7 +5,7 @@ import DashboardLayout from "@/components/DashboardLayout";
 import { useAuth } from "@/hooks/useAuth";
 import { trpc } from "@/lib/trpc";
 import type { LucideIcon } from "lucide-react";
-import { Shield, Activity, Trash2, FileText, Building2, Users, Car, Bell, Settings, ToggleLeft, HardHat, Award, Inbox, DollarSign, Gift } from "lucide-react";
+import { Shield, Activity, Trash2, FileText, Building2, Users, Car, Bell, Settings, ToggleLeft } from "lucide-react";
 
 /**
  * Settings Center shell: DashboardLayout + a persistent left second-level menu
@@ -35,20 +35,6 @@ export const SETTINGS_NAV: { titleKey: string; items: NavItem[] }[] = [
       { icon: Bell, labelKey: "sidebar.notifications", path: "/admin/notifications", permission: "settings" },
       { icon: Settings, labelKey: "sidebar.siteSettings", path: "/admin/site-settings", permission: "settings" },
       { icon: ToggleLeft, labelKey: "sidebar.featureFlags", path: "/admin/settings/feature-flags", permission: "super_admin" },
-    ],
-  },
-  {
-    // Modules that exist but carry no data in production (operators 0, fleet
-    // certificates 0, inquiries 0, category pricing 0, promotions 3). They stay
-    // fully functional — just moved out of the daily sidebar so staff scan five
-    // fewer dead entries. Move one back up top the moment it starts being used.
-    titleKey: "sidebar.seldomUsed",
-    items: [
-      { icon: HardHat, labelKey: "sidebar.operators", path: "/admin/operators", permission: "operators" },
-      { icon: Award, labelKey: "sidebar.certificates", path: "/admin/fleet-certificates", permission: "fleet" },
-      { icon: Inbox, labelKey: "sidebar.inquiries", path: "/admin/inquiries", permission: "customers" },
-      { icon: DollarSign, labelKey: "sidebar.categoryPricing", path: "/admin/category-pricing", permission: "fleet" },
-      { icon: Gift, labelKey: "sidebar.promotions", path: "/admin/promotions", permission: "promotions" },
     ],
   },
 ];

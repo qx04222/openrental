@@ -943,27 +943,6 @@ export const notificationLog = pgTable("notification_log", {
   createdAtIdx: index("notification_log_created_at_idx").on(table.createdAt),
 }));
 
-// ─── Contact Inquiries ────────────────────────────────────────
-// Public "Contact Us / quote request" form submissions from the standalone
-// brand site. Unauthenticated insert (publicProcedure); staff triage via status.
-export const contactInquiries = pgTable("contact_inquiries", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
-  email: varchar("email", { length: 255 }).notNull(),
-  phone: varchar("phone", { length: 50 }),
-  company: varchar("company", { length: 255 }),
-  equipmentInterest: varchar("equipmentInterest", { length: 255 }),
-  message: text("message").notNull(),
-  status: varchar("status", { length: 20 }).default("new").notNull(),
-  source: varchar("source", { length: 50 }).default("website").notNull(),
-  ipAddress: varchar("ipAddress", { length: 64 }),
-  createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
-  deletedAt: timestamp("deletedAt", { mode: "date" }),
-}, (table) => ({
-  statusIdx: index("contact_inquiries_status_idx").on(table.status),
-  createdAtIdx: index("contact_inquiries_created_at_idx").on(table.createdAt),
-}));
-
 // ─── Sessions ─────────────────────────────────────────────────
 export const sessions = pgTable("sessions", {
   id: serial("id").primaryKey(),
@@ -1470,27 +1449,6 @@ export const workOrderLabor = pgTable("work_order_labor", {
 
 export type WorkOrderLabor = typeof workOrderLabor.$inferSelect;
 
-// ─── Operators (equipment operators) ─────────────────────────
-export const operators = pgTable("operators", {
-  id: serial("id").primaryKey(),
-  name: varchar("name", { length: 255 }).notNull(),
-  phone: varchar("phone", { length: 50 }),
-  email: varchar("email", { length: 255 }),
-  userId: integer("userId").references(() => users.id, { onDelete: "set null" }),
-  certifications: jsonb("certifications").$type<Array<{ type: string; number: string; issuedAt?: string; expiresAt?: string }>>().default([]),
-  dailyRate: numeric("dailyRate", { precision: 10, scale: 2 }),
-  isActive: boolean("isActive").default(true).notNull(),
-  notes: text("notes"),
-  createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt", { mode: "date" }).defaultNow().notNull(),
-  deletedAt: timestamp("deletedAt", { mode: "date" }),
-}, (table) => ({
-  activeIdx: index("operators_active_idx").on(table.isActive),
-  userIdx: index("operators_user_idx").on(table.userId),
-}));
-
-export type Operator = typeof operators.$inferSelect;
-
 // ─── Drivers (delivery/transport drivers) ────────────────────
 export const drivers = pgTable("drivers", {
   id: serial("id").primaryKey(),
@@ -1541,27 +1499,6 @@ export const damageClaims = pgTable("damage_claims", {
 }));
 
 export type DamageClaim = typeof damageClaims.$inferSelect;
-
-// ─── Fleet Certificates ──────────────────────────────────────
-export const fleetCertificates = pgTable("fleet_certificates", {
-  id: serial("id").primaryKey(),
-  rentalFleetId: integer("rentalFleetId").references(() => rentalFleet.id, { onDelete: "set null" }),
-  certType: varchar("certType", { length: 50 }).notNull(),
-  certNumber: varchar("certNumber", { length: 100 }),
-  issueDate: timestamp("issueDate", { mode: "date" }),
-  expiryDate: timestamp("expiryDate", { mode: "date" }),
-  documentUrl: text("documentUrl"),
-  reminderDays: integer("reminderDays").default(30),
-  status: varchar("status", { length: 20 }).default("valid").notNull(),
-  notes: text("notes"),
-  createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt", { mode: "date" }).defaultNow().notNull(),
-}, (table) => ({
-  fleetIdx: index("fleet_certificates_fleet_idx").on(table.rentalFleetId),
-  expiryIdx: index("fleet_certificates_expiry_idx").on(table.expiryDate),
-}));
-
-export type FleetCertificate = typeof fleetCertificates.$inferSelect;
 
 // ─── Deposit Rules ────────────────────────────────────────────
 export const depositRules = pgTable("deposit_rules", {
@@ -1713,38 +1650,6 @@ export const featureFlags = pgTable("feature_flags", {
 
 export type FeatureFlag = typeof featureFlags.$inferSelect;
 
-// ─── Greeting Templates ─────────────────────────────────────
-export const greetingTemplates = pgTable("greeting_templates", {
-  id: serial("id").primaryKey(),
-  type: varchar("type", { length: 40 }).notNull(),      // 'birthday' | 'christmas' | 'new_year'
-  language: varchar("language", { length: 8 }).notNull(), // 'en' | 'zh'
-  subject: varchar("subject", { length: 255 }).notNull(),
-  body: text("body").notNull(),
-  active: boolean("active").default(true).notNull(),
-  createdAt: timestamp("createdAt", { mode: "date" }).defaultNow().notNull(),
-  updatedAt: timestamp("updatedAt", { mode: "date" }).defaultNow().notNull(),
-}, (table) => ({
-  typeLanguageUnique: unique("greeting_templates_type_lang_unique").on(table.type, table.language),
-  typeIdx: index("greeting_templates_type_idx").on(table.type),
-}));
-
-export type GreetingTemplate = typeof greetingTemplates.$inferSelect;
-export type InsertGreetingTemplate = typeof greetingTemplates.$inferInsert;
-
-// ─── Greeting Log ────────────────────────────────────────────
-export const greetingLog = pgTable("greeting_log", {
-  id: serial("id").primaryKey(),
-  customerId: integer("customerId").notNull().references(() => customers.id, { onDelete: "cascade" }),
-  type: varchar("type", { length: 40 }).notNull(),
-  sentAt: timestamp("sentAt", { mode: "date" }).defaultNow().notNull(),
-  sentForDate: date("sentForDate", { mode: "string" }).notNull(), // avoids double-sending for the same day
-}, (table) => ({
-  greetingLogUnique: uniqueIndex("greeting_log_unique").on(table.customerId, table.type, table.sentForDate),
-}));
-
-export type GreetingLog = typeof greetingLog.$inferSelect;
-export type InsertGreetingLog = typeof greetingLog.$inferInsert;
-
 // ─── Rental lifecycle effects ─────────────────────────────────
 // Additive durable ledger for post-commit work planned by a rental status
 // command. No historical business row is backfilled into this table.
@@ -1770,41 +1675,3 @@ export const rentalLifecycleEffects = pgTable("rental_lifecycle_effects", {
 export type RentalLifecycleEffect = typeof rentalLifecycleEffects.$inferSelect;
 export type InsertRentalLifecycleEffect = typeof rentalLifecycleEffects.$inferInsert;
 
-// ─── MailPulse Outbox ─────────────────────────────────────────
-// Durable local queue for events pushed to MailPulse (external CRM/marketing
-// tool). Enqueue is synchronous with the business write (best-effort, never
-// throws); delivery is an async flush (cron + fire-and-forget on enqueue)
-// with exponential backoff. See server/services/mailpulseConnector.ts.
-export const mailpulseOutbox = pgTable("mailpulse_outbox", {
-  id: serial("id").primaryKey(),
-  payload: jsonb("payload").notNull(),
-  attempts: integer("attempts").default(0).notNull(),
-  nextAttemptAt: timestamp("nextAttemptAt", { mode: "date", withTimezone: true }).defaultNow().notNull(),
-  deliveredAt: timestamp("deliveredAt", { mode: "date", withTimezone: true }),
-  lastError: text("lastError"),
-  createdAt: timestamp("createdAt", { mode: "date", withTimezone: true }).defaultNow().notNull(),
-}, (table) => ({
-  pendingIdx: index("mailpulse_outbox_pending_idx").on(table.deliveredAt, table.nextAttemptAt),
-}));
-
-export type MailpulseOutboxRow = typeof mailpulseOutbox.$inferSelect;
-export type InsertMailpulseOutboxRow = typeof mailpulseOutbox.$inferInsert;
-
-// ─── Workshop Outbox ──────────────────────────────────────────
-// Outbound queue for "real damage found" events posted to the workshop system
-// (openrental-repairshop). Mirrors mailpulse_outbox. See sql/142 +
-// server/services/workshopConnector.ts.
-export const workshopOutbox = pgTable("workshop_outbox", {
-  id: serial("id").primaryKey(),
-  payload: jsonb("payload").notNull(),
-  attempts: integer("attempts").default(0).notNull(),
-  nextAttemptAt: timestamp("nextAttemptAt", { mode: "date", withTimezone: true }).defaultNow().notNull(),
-  deliveredAt: timestamp("deliveredAt", { mode: "date", withTimezone: true }),
-  lastError: text("lastError"),
-  createdAt: timestamp("createdAt", { mode: "date", withTimezone: true }).defaultNow().notNull(),
-}, (table) => ({
-  pendingIdx: index("workshop_outbox_pending_idx").on(table.deliveredAt, table.nextAttemptAt),
-}));
-
-export type WorkshopOutboxRow = typeof workshopOutbox.$inferSelect;
-export type InsertWorkshopOutboxRow = typeof workshopOutbox.$inferInsert;

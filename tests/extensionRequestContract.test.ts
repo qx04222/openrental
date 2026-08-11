@@ -26,7 +26,7 @@ function requestItem(overrides: Partial<ExtensionRequestListItem> = {}): Extensi
     rental: {
       id: 278,
       rentalNumber: "20260716TN",
-      equipmentDescription: "SDLG STR1000H",
+      equipmentDescription: "Northline STR1000H",
       startDate: new Date("2026-07-16T04:00:00.000Z"),
       endDate: new Date("2026-07-17T04:00:00.000Z"),
       status: "completed",
