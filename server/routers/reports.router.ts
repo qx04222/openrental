@@ -563,7 +563,8 @@ export const reportsRouter = router({
    * with per-unit idle-tier classification over a selectable window (the office
    * "设备总价与月供" + "月供方案对比" spreadsheets, made live).
    *
-   * purchaseCost is the financed basis (Rental Company Financing, sql/135), so
+   * purchaseCost is taken as recorded on the asset — if that is a financed
+   * basis it is already marked up, so
    * monthly = total ÷ term, no interest. Window defaults to season-open (first
    * rental of the year) → today, matching the utilization report.
    */
@@ -1686,7 +1687,7 @@ export const reportsRouter = router({
         -- Multi-item orders: the fee is booked per line, but the ORDER's
         -- rentalFee is what was actually charged, and the two drift — a price
         -- match or a later edit rewrites the order without touching the lines
-        -- (20260626XN: order $1870 vs lines $1000). Summing the lines silently
+        -- (20260626TE: order $1870 vs lines $1000). Summing the lines silently
         -- drops that $870 from per-asset revenue, so apportion the order's real
         -- fee across its lines instead. Revenue is then conserved: the parts
         -- always add back up to the whole.

@@ -120,8 +120,8 @@ describe("rental asset progress router", () => {
     loadFieldProgressMock.mockResolvedValue([progress({
       occupancyConflict: true,
       conflictingRentals: [
-        { rentalId: 10, rentalNumber: "20260528GC" },
-        { rentalId: 11, rentalNumber: "20260702LO" },
+        { rentalId: 10, rentalNumber: "20260528TB" },
+        { rentalId: 11, rentalNumber: "20260702TI" },
       ],
     })]);
     const caller = createCaller(makeCtx("field_staff"));

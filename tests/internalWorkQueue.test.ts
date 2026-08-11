@@ -92,14 +92,14 @@ describe("internal work queue", () => {
     // sitting unnoticed because nothing counted them.
     const sla = WORK_QUEUE_SLA_DAYS.held_deposit;
     const { buckets } = summarizeWorkQueue([
-      row("held_deposit", 58, sla + 21, { status: "completed", ref: "20260528GC" }),
-      row("held_deposit", 271, sla - 1, { status: "cancelled", ref: "20260714MD" }),
+      row("held_deposit", 58, sla + 21, { status: "completed", ref: "20260528TB" }),
+      row("held_deposit", 271, sla - 1, { status: "cancelled", ref: "20260714TL" }),
     ]);
 
     const bucket = buckets.find((b) => b.kind === "held_deposit")!;
     expect(bucket.count).toBe(2);
     expect(bucket.overdueCount).toBe(1);
-    expect(bucket.items[0].ref).toBe("20260528GC");
+    expect(bucket.items[0].ref).toBe("20260528TB");
   });
 
   it("reports an empty queue as genuinely empty, not as a missing bucket", () => {

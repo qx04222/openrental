@@ -247,7 +247,7 @@
   "reports.financing.scn.current": "Current (all units)",
   "reports.financing.scn.exTier1": "Drop Tier1 (fully idle)",
   "reports.financing.scn.exTier1Tier2": "Drop Tier1 + Tier2",
-  "reports.financing.scenarioNote": "0% interest → monthly = total ÷ term. Unit value is the financed basis (Rental Company Financing). Saving is vs the Current plan at the same term.",
+  "reports.financing.scenarioNote": "Zero-interest: monthly = total ÷ term. Unit price is the purchase cost recorded on the asset. \"Saved/mo\" compares against the current plan at the same term.",
   "reports.financing.valuationTitle": "Fleet value by model",
   "reports.financing.colModel": "Model",
   "reports.financing.colUnitPrice": "Unit price",

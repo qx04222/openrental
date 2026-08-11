@@ -7,7 +7,7 @@ describe("Rental Management search", () => {
   const row = {
     rental_requests: {
       id: 25,
-      rentalNumber: "20260506ZB",
+      rentalNumber: "20260506TA",
       financialOrderNumber: "SOT12701",
       customerName: "A&J Canada Construction Inc.",
       customerEmail: "dispatch@example.com",
@@ -34,7 +34,7 @@ describe("Rental Management search", () => {
     });
 
     for (const expected of [
-      "25", "#25", "20260506ZB", "SOT12701", "A&J Canada Construction Inc.",
+      "25", "#25", "20260506TA", "SOT12701", "A&J Canada Construction Inc.",
       "dispatch@example.com", "416-555-0125", "2 Ton Mini Excavator", "SDLG",
       "ER627H", "E627-1", "FLEET-059", "Mini Excavator", "completed", "已完成",
       "2026/04/29", "2026/04/30",
@@ -45,9 +45,9 @@ describe("Rental Management search", () => {
 
   it("lets a table search values supplied by the page instead of only column keys", () => {
     const columns = [{ key: "id" }];
-    const displayRow = { id: 25, displayedOrderNumber: "20260506ZB" };
+    const displayRow = { id: 25, displayedOrderNumber: "20260506TA" };
 
-    expect(matchesTableSearch(displayRow, columns, "20260506zb", (item) => item.displayedOrderNumber)).toBe(true);
+    expect(matchesTableSearch(displayRow, columns, "20260506ta", (item) => item.displayedOrderNumber)).toBe(true);
     expect(matchesTableSearch(displayRow, columns, "missing", (item) => item.displayedOrderNumber)).toBe(false);
   });
 

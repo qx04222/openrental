@@ -4076,7 +4076,7 @@ export const rentalRequestsRouter = router({
   // Public: lookup rental by ID + email (for customer self-service)
   lookupByIdAndEmail: publicProcedure
     .input(z.object({
-      // The customer only ever sees their rentalNumber (e.g. "20260701WD"), so
+      // The customer only ever sees their rentalNumber (e.g. "20260701TH"), so
       // accept that as the primary identifier. A bare numeric string still works
       // (the post-order redirect passes the DB id) — we match either the
       // rentalNumber or, when the ref is all digits, the numeric id.
@@ -4582,7 +4582,7 @@ export const rentalRequestsRouter = router({
         const freight = parseFloat(source.freightCost || "0");
         // Tax must NOT scale with the day ratio — freight doesn't grow with
         // the term, so ratio-scaling the tax over-counts the freight tax
-        // (#20260626XN). Recompute on the new base; province-rate lookup only
+        // (#20260626TE). Recompute on the new base; province-rate lookup only
         // depends on the order, so it works for multi-item rentals too.
         const newTaxBase = newRentalFee + newInsuranceCost + freight;
         try {

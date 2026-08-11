@@ -325,7 +325,7 @@ export const customerCreditRouter = router({
    *
    * A credit note is a negative invoice — money we owe the customer, sitting
    * outside the credit ledger. That splits their claim across two places: order
-   * 20260715TR shows $795.46 of credit while CN-2026-0001 separately owes them
+   * 20260715TM shows $795.46 of credit while CN-2026-0001 separately owes them
    * $40.68. Absorbing it settles the note and puts the whole amount in one
    * number the customer (and the office) can actually read.
    */
