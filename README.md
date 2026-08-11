@@ -12,7 +12,7 @@ Fleet ledger · order lifecycle · tiered pricing · invoicing & deposits · rec
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6.svg)](tsconfig.json)
 [![Postgres](https://img.shields.io/badge/Postgres-14%2B-336791.svg)](sql/000_baseline.sql)
 
-**[Quick start](#quick-start) · [What you get](#what-you-get) · [Why North America](#why-north-america) · [Contributing](CONTRIBUTING.md)**
+**[Quick start](#quick-start) · [What you get](#what-you-get) · [Why North America](#why-north-america) · [Project status](#project-status) · [Contributing](CONTRIBUTING.md)**
 
 </div>
 
@@ -172,14 +172,27 @@ Every company, person, phone number and address in the seeds, fixtures, tests an
 
 ---
 
+## Project status
+
+**Extracted from production, maintained on a hobby schedule.** Worth knowing before you depend on it:
+
+- The code has run a real rental business daily, so the business rules are load-bearing rather than theoretical — but it has run exactly *one* business. Expect assumptions that fit that yard and not yours.
+- It is maintained by its author in spare time. **Issues may take a while, and some will be closed as out of scope.** That is not neglect; it is the honest capacity.
+- No release cadence and no long-term support commitment yet. `main` is kept green — every commit runs type check, lint, 1,433 tests, a production build, and applies the baseline schema and both seeds to a fresh Postgres — but there are no tagged releases before 1.0.
+- Pull requests are genuinely welcome, especially the ones listed below. A focused PR with a test is far more likely to be merged quickly than an issue asking for a feature.
+
+If you are considering running this for real: read [SECURITY.md](SECURITY.md) first, change the seeded credentials, and treat pre-1.0 as pre-1.0.
+
 ## Contributing
 
 Issues and PRs welcome — start with [CONTRIBUTING.md](CONTRIBUTING.md). Good places to begin:
 
-- **US sales tax** behind the existing `taxCalculation` interface
-- **A second notification provider** (Twilio, SendGrid) following the delivery-fact pattern
-- **Metric / imperial toggle** for hour meters, weights and dimensions
-- **Accessibility pass** on the admin tables
+- [**US sales tax**](https://github.com/qx04222/openrental/issues/9) behind the existing `taxCalculation` interface
+- [**A second notification provider**](https://github.com/qx04222/openrental/issues/10) (Twilio, SendGrid) following the delivery-fact pattern
+- [**Metric / imperial toggle**](https://github.com/qx04222/openrental/issues/11) for hour meters, weights and dimensions
+- [**Accessibility pass**](https://github.com/qx04222/openrental/issues/12) on the admin tables
+
+Each is written up with the constraints that matter and where to look — see all [`good first issue`](https://github.com/qx04222/openrental/labels/good%20first%20issue).
 
 Docs: [architecture map](docs/index.md) · [rentals](docs/modules/rentals.md) · [money](docs/modules/money.md) · [customers](docs/modules/customers.md) · [database](docs/modules/database.md)
 

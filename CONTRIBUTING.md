@@ -1,7 +1,13 @@
 # Contributing
 
-Thanks for looking. This project is maintained in whatever time its authors
-have, so the most useful thing you can do is make a change easy to say yes to.
+Thanks for looking. This project is maintained in spare time, so the most
+useful thing you can do is make a change easy to say yes to.
+
+**What to expect:** a focused PR with a test usually gets a quick answer. An
+issue proposing a feature may sit for a while, or be closed as out of scope —
+please do not read that as hostility, it is capacity. If something matters to
+you and you are willing to build it, say so in the issue; that changes the
+calculation considerably.
 
 ## Getting a dev environment
 
