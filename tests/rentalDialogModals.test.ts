@@ -5,7 +5,7 @@
  * pricing tab, both opened dialogs that were nested inside the credit-order
  * branch. On an ordinary order the click set the state and nothing mounted, so
  * the button did nothing at all — no dialog, no error, no clue. Reported from
- * production on order 20260706GS, whose $2,500 prepayment was a typo that could
+ * production on order 20260706TK, whose $2,500 prepayment was a typo that could
  * not be removed.
  */
 import { describe, expect, it } from "vitest";

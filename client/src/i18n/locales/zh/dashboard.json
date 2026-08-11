@@ -247,7 +247,7 @@
   "reports.financing.scn.current": "现状（全部）",
   "reports.financing.scn.exTier1": "除 Tier1（全闲）",
   "reports.financing.scn.exTier1Tier2": "除 Tier1 + Tier2",
-  "reports.financing.scenarioNote": "0息 → 月供 = 总价 ÷ 期数。单价为融资基准（Rental Company Financing）。“省/月”为相对现状同期数。",
+  "reports.financing.scenarioNote": "0息 → 月供 = 总价 ÷ 期数。单价取设备上记录的采购价。“省/月”为相对现状同期数。",
   "reports.financing.valuationTitle": "按机型设备总值",
   "reports.financing.colModel": "机型",
   "reports.financing.colUnitPrice": "单价",

@@ -2,7 +2,7 @@
  * releaseFleetAsset must be order-aware: closing/cancelling an order must NOT
  * flip a unit back to `available` if another *active* order still holds it.
  *
- * Regression (orders 20260629MP / 20260629LB): an overdue order was closed late,
+ * Regression (orders 20260629TG / 20260629TF): an overdue order was closed late,
  * after a newer order had already activated on the same unit; the fleet-id-keyed
  * release stranded the active order as "active but not rented" (double-booked alert).
  */

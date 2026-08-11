@@ -79,7 +79,7 @@ export function repriceLineItems(
  * Pro-rata fallback tax: scale the old tax by the change in its BASE
  * (rent + insurance + freight), never by the day ratio — freight doesn't grow
  * with the term, so ratio-scaling the tax over-counts the freight tax
- * (the #20260626XN renewal bug).
+ * (the #20260626TE renewal bug).
  */
 export function scaleTaxByBase(oldTax: number, oldBase: number, newBase: number): number {
   if (!(oldBase > 0)) return Math.round(oldTax * 100) / 100;

@@ -74,22 +74,22 @@ describe("operational fleet blocks carry their reason", () => {
     // Order reversed on purpose: rank must decide, not row order.
     const blocks = await listOperationalFleetBlocks(fakeDb([
       { fleetId: 9, reason: "work_order", ref: "WO-1" },
-      { fleetId: 9, reason: "rental", ref: "20260702WK" },
-      { fleetId: 9, reason: "return", ref: "20260613GC" },
+      { fleetId: 9, reason: "rental", ref: "20260702TJ" },
+      { fleetId: 9, reason: "return", ref: "20260613TC" },
     ]));
 
     // Naming the work order on a machine that is actually out on rent would
     // send the operator to the wrong screen.
-    expect(blocks.get(9)).toEqual({ reason: "rental", refs: ["20260702WK"] });
+    expect(blocks.get(9)).toEqual({ reason: "rental", refs: ["20260702TJ"] });
   });
 
   it("prefers an unfinished return over an open work order", async () => {
     const blocks = await listOperationalFleetBlocks(fakeDb([
       { fleetId: 3, reason: "work_order", ref: "WO-7" },
-      { fleetId: 3, reason: "return", ref: "20260620NO" },
+      { fleetId: 3, reason: "return", ref: "20260620TD" },
     ]));
 
-    expect(blocks.get(3)).toEqual({ reason: "return", refs: ["20260620NO"] });
+    expect(blocks.get(3)).toEqual({ reason: "return", refs: ["20260620TD"] });
   });
 
   it("leaves unblocked units out of the map entirely", async () => {

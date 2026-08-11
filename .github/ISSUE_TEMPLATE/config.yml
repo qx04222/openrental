@@ -1,5 +1,5 @@
 blank_issues_enabled: true
 contact_links:
   - name: Security or privacy report
-    url: https://github.com/OWNER/openrental/security/advisories/new
+    url: https://github.com/qx04222/openrental/security/advisories/new
     about: Do not open a public issue for these.

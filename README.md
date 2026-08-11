@@ -5,7 +5,7 @@
 Fleet ledger, order lifecycle, tiered pricing, invoicing, deposits and receivables — plus an offline-capable field PWA for inspections and signatures. Apache-2.0.
 
 ```bash
-git clone https://github.com/OWNER/openrental.git && cd openrental
+git clone https://github.com/qx04222/openrental.git && cd openrental
 cp .env.example .env          # set DATABASE_URL
 npm install
 npm run db:baseline           # one SQL file, 63 tables

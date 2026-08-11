@@ -10,8 +10,8 @@ const claim = (overrides: Partial<{
 }> = {}) => ({
   rentalFleetId: 71,
   rentalId: 58,
-  rentalNumber: "20260528GC",
-  customerName: "BBN Renovations LTD",
+  rentalNumber: "20260528TB",
+  customerName: "Okoye General Contracting",
   status: "overdue",
   ...overrides,
 });
@@ -20,14 +20,14 @@ describe("fleet rental conflict derivation", () => {
   it("reports two distinct open rentals claiming the same fleet unit", () => {
     const conflicts = deriveFleetRentalConflicts([
       claim(),
-      claim({ rentalId: 251, rentalNumber: "20260702LO", customerName: "Birchwood Landscaping" }),
+      claim({ rentalId: 251, rentalNumber: "20260702TI", customerName: "Birchwood Landscaping" }),
     ]);
 
     expect(conflicts.get(71)).toEqual({
       rentalFleetId: 71,
       rentals: [
-        expect.objectContaining({ rentalId: 58, rentalNumber: "20260528GC" }),
-        expect.objectContaining({ rentalId: 251, rentalNumber: "20260702LO" }),
+        expect.objectContaining({ rentalId: 58, rentalNumber: "20260528TB" }),
+        expect.objectContaining({ rentalId: 251, rentalNumber: "20260702TI" }),
       ],
     });
   });
@@ -41,7 +41,7 @@ describe("fleet rental conflict derivation", () => {
   it("does not report different fleet units as a conflict", () => {
     const conflicts = deriveFleetRentalConflicts([
       claim(),
-      claim({ rentalFleetId: 72, rentalId: 251, rentalNumber: "20260702LO" }),
+      claim({ rentalFleetId: 72, rentalId: 251, rentalNumber: "20260702TI" }),
     ]);
 
     expect(conflicts.size).toBe(0);

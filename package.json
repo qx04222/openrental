@@ -114,7 +114,7 @@
   "description": "Self-hostable equipment rental management — fleet ledger, order lifecycle, tiered pricing, invoicing & deposits, plus an offline-capable field inspection PWA.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/OWNER/openrental.git"
+    "url": "https://github.com/qx04222/openrental.git"
   },
   "keywords": [
     "rental",

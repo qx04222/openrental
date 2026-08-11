@@ -92,8 +92,8 @@ describe("rental asset progress resolver", () => {
       rentalStatus: "overdue",
       occupancyConflict: true,
       conflictingRentals: [
-        { rentalId: 10, rentalNumber: "20260528GC", customerName: "BBN", status: "overdue" },
-        { rentalId: 11, rentalNumber: "20260702LO", customerName: "Dream", status: "overdue" },
+        { rentalId: 10, rentalNumber: "20260528TB", customerName: "Okoye GC", status: "overdue" },
+        { rentalId: 11, rentalNumber: "20260702TI", customerName: "Dream", status: "overdue" },
       ],
     }));
 
@@ -101,8 +101,8 @@ describe("rental asset progress resolver", () => {
       stage: "in_rental",
       occupancyConflict: true,
       conflictingRentals: [
-        expect.objectContaining({ rentalNumber: "20260528GC" }),
-        expect.objectContaining({ rentalNumber: "20260702LO" }),
+        expect.objectContaining({ rentalNumber: "20260528TB" }),
+        expect.objectContaining({ rentalNumber: "20260702TI" }),
       ],
     });
   });

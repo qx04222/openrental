@@ -5,8 +5,9 @@
  * supplies the fleet units (each unit's acquisition value + its idle tier) and
  * the configurable financing terms, then renders the result.
  *
- * `purchaseCost` here is ALREADY the financed basis (Rental Company Financing =
- * Unit Cash Cost × 1.30 — see sql/135 and CLAUDE.md), so the monthly payment is
+ * `purchaseCost` is whatever basis your business records on the asset. If you
+ * store a financed price rather than a cash price, it is already marked up —
+ * do not apply a financing factor a second time here. The monthly payment is
  * simply total ÷ term with NO interest and NO extra markup. Three exclusion
  * scenarios mirror the office spreadsheet: keep everything, drop the fully-idle
  * (Tier1), drop fully-idle + barely-used (Tier1 + Tier2).

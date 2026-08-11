@@ -1,7 +1,7 @@
 /**
  * Repricing helpers behind recalculateRentalPricing.
  *
- * Regression anchor: rental #20260626XN (2 line items, header rentalFleetId
+ * Regression anchor: rental #20260626TE (2 line items, header rentalFleetId
  * NULL). Renewal +7d fell into the pro-rata fallback which scaled the TAX by
  * the day ratio — but the tax base includes freight, which does not grow with
  * the term, so the freight tax got doubled (353.66 instead of 316.62).
@@ -13,7 +13,7 @@ import { repriceLineItems, scaleTaxByBase, carryNegotiatedRate, priceLineItems }
 const d = (iso: string) => new Date(`${iso}T12:00:00-04:00`);
 
 describe("scaleTaxByBase (pro-rata fallback tax)", () => {
-  it("reproduces the #20260626XN fix: scales by base, not by day ratio", () => {
+  it("reproduces the #20260626TE fix: scales by base, not by day ratio", () => {
     // old: rent 935 + ins 140.25 + freight 285 → tax 176.83 (13%)
     // new: rent 1870 + ins 280.50 + freight 285 (freight unchanged)
     const oldBase = 935 + 140.25 + 285;
@@ -78,7 +78,7 @@ describe("repriceLineItems", () => {
 
 describe("carryNegotiatedRate (谈判价延续)", () => {
   it("scales the new list fee by the booked discount ratio", () => {
-    // #20260626XN: booked 935 vs list 1000 (7d) → 14d list 2000 carries to 1870
+    // #20260626TE: booked 935 vs list 1000 (7d) → 14d list 2000 carries to 1870
     expect(carryNegotiatedRate(935, 1000, 2000)).toBe(1870);
   });
 
