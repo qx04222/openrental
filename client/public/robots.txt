@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /$
+Allow: /rent-equipment
+Allow: /contact
+Allow: /mini-excavator-rental
+Allow: /scissor-lift-rental
+Allow: /compact-track-loader-rental
+Disallow: /admin
+Disallow: /portal
+Disallow: /field
+Disallow: /api
+Disallow: /checkout
+Disallow: /rental-request
+Disallow: /rental-status
+Disallow: /driver
+Disallow: /inspect
+
+Sitemap: https://demo.openrental.example/sitemap.xml

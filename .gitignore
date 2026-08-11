@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.env
+*.tsbuildinfo
+.DS_Store
+.claude/
+.worktrees/
+
+# Generated files
+coverage/
+*.patch
+
+
+.env.local
+.env.*.local
+*.log

@@ -1,0 +1,27 @@
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 5
+    groups:
+      # Grouped so a routine month is one PR, not twenty. Major bumps stay
+      # ungrouped and get reviewed one at a time — an unattended major upgrade
+      # is how you take a production system down.
+      patch-updates:
+        update-types: ["patch"]
+      minor-updates:
+        update-types: ["minor"]
+    labels: ["dependencies"]
+    commit-message:
+      prefix: "deps"
+      prefix-development: "deps-dev"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    labels: ["dependencies"]
+    commit-message:
+      prefix: "deps"

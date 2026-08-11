@@ -1,0 +1,41 @@
+# Evaluate OpenRental in one command:
+#
+#   docker compose up --build
+#   docker compose exec app sh -c 'npm run db:baseline && npm run seed && npm run seed:demo'
+#
+# Then open http://localhost:3000/admin and sign in as admin / admin123.
+#
+# This is a convenience for trying it out, not a production topology: the
+# database password is a literal, and Postgres is exposed on the host.
+
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_PASSWORD: openrental
+      POSTGRES_USER: openrental
+      POSTGRES_DB: openrental
+    ports: ["5432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U openrental"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  app:
+    build: .
+    depends_on:
+      db: { condition: service_healthy }
+    environment:
+      DATABASE_URL: postgresql://openrental:openrental@db:5432/openrental
+      NODE_ENV: production
+      PORT: 3000
+      # Change this to your yard's zone before doing anything real with it.
+      APP_TIMEZONE: America/Toronto
+      CRON_TIMEZONE: America/Toronto
+      SITE_URL: http://localhost:3000
+    ports: ["3000:3000"]
+
+volumes:
+  pgdata:

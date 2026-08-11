@@ -1,0 +1,22 @@
+name: Feature request
+description: Propose something OpenRental should do
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: |
+        Describe the operational problem, not the solution. "Our yard needs X
+        because otherwise staff have to Y every morning" is far more useful
+        than a feature name.
+    validations: { required: true }
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you have in mind
+  - type: dropdown
+    id: region
+    attributes:
+      label: Does this depend on where you operate?
+      options: ["No", "Canada-specific", "US-specific", "Elsewhere"]

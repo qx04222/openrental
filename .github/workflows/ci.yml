@@ -1,0 +1,63 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: openrental_ci
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports: ["5432:5432"]
+
+    env:
+      DATABASE_URL: postgresql://postgres:postgres@localhost:5432/openrental_ci
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Type check
+        run: npm run check
+
+      - name: Lint
+        run: npm run lint:ci
+
+      - name: Unit tests
+        run: npm test
+
+      # The build is not redundant with the type check: esbuild and Vite catch
+      # a class of error tsc does not see. Do not drop this step.
+      - name: Build
+        run: npm run build
+
+      - name: Schema baseline applies cleanly
+        run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -f sql/000_baseline.sql
+
+      - name: Seeds run against a fresh schema
+        run: |
+          npm run seed
+          npm run seed:demo
