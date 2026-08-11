@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 330" width="980" height="330" role="img" aria-label="Where a customer's money can be: allocated to an invoice, held as a deposit, or on the customer's credit balance">
+  <style>
+    .box   { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; }
+    .box-m { fill: #ecfdf5; stroke: #059669; stroke-width: 1.5; }
+    .box-h { fill: #fffbeb; stroke: #d97706; stroke-width: 1.5; }
+    .box-c { fill: #eff6ff; stroke: #2563eb; stroke-width: 1.5; }
+    .lbl   { font: 600 14px ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; fill: #0f172a; }
+    .sub   { font: 11px ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; fill: #64748b; }
+    .hdr   { font: 700 12px ui-sans-serif, system-ui, sans-serif; fill: #64748b; letter-spacing: .08em; }
+    .note  { font: italic 12px ui-sans-serif, system-ui, sans-serif; fill: #475569; }
+    .arrow { stroke: #94a3b8; stroke-width: 1.5; fill: none; marker-end: url(#b); }
+    .rule  { stroke: #e2e8f0; stroke-width: 1; }
+    @media (prefers-color-scheme: dark) {
+      .box   { fill: #0f172a; stroke: #334155; }
+      .box-m { fill: #052e21; stroke: #10b981; }
+      .box-h { fill: #2a1e05; stroke: #f59e0b; }
+      .box-c { fill: #172554; stroke: #3b82f6; }
+      .lbl   { fill: #e2e8f0; }
+      .sub   { fill: #94a3b8; }
+      .hdr   { fill: #94a3b8; }
+      .note  { fill: #cbd5e1; }
+      .arrow { stroke: #475569; }
+      .rule  { stroke: #1e293b; }
+    }
+  </style>
+  <defs>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+
+  <text class="hdr" x="20" y="28">EVERY DOLLAR IS IN EXACTLY ONE OF THREE PLACES</text>
+
+  <rect class="box" x="20" y="46" width="150" height="60" rx="8"/>
+  <text class="lbl" x="95" y="72" text-anchor="middle">Customer pays</text>
+  <text class="sub" x="95" y="90" text-anchor="middle">cash · e-transfer · card</text>
+
+  <rect class="box-m" x="300" y="26" width="200" height="62" rx="8"/>
+  <text class="lbl" x="400" y="52" text-anchor="middle">Allocated to an invoice</text>
+  <text class="sub" x="400" y="70" text-anchor="middle">reduces balanceDue</text>
+
+  <rect class="box-h" x="300" y="110" width="200" height="62" rx="8"/>
+  <text class="lbl" x="400" y="136" text-anchor="middle">Held as a deposit</text>
+  <text class="sub" x="400" y="154" text-anchor="middle">against the order, not revenue</text>
+
+  <rect class="box-c" x="300" y="194" width="200" height="62" rx="8"/>
+  <text class="lbl" x="400" y="220" text-anchor="middle">Customer credit balance</text>
+  <text class="sub" x="400" y="238" text-anchor="middle">a liability you owe back</text>
+
+  <path class="arrow" d="M170 70 C230 70 240 57 296 57"/>
+  <path class="arrow" d="M170 76 C230 76 240 141 296 141"/>
+  <path class="arrow" d="M170 82 C230 82 240 225 296 225"/>
+
+  <rect class="box" x="640" y="110" width="200" height="62" rx="8"/>
+  <text class="lbl" x="740" y="136" text-anchor="middle">Applied to rent</text>
+  <text class="sub" x="740" y="154" text-anchor="middle">appliedAt</text>
+
+  <rect class="box" x="640" y="194" width="200" height="62" rx="8"/>
+  <text class="lbl" x="740" y="220" text-anchor="middle">Moved to balance</text>
+  <text class="sub" x="740" y="238" text-anchor="middle">transferredToCreditAt</text>
+
+  <path class="arrow" d="M500 138 H636"/>
+  <path class="arrow" d="M500 150 C560 150 570 218 636 218"/>
+
+  <line class="rule" x1="20" y1="282" x2="960" y2="282"/>
+  <text class="note" x="20" y="306">A closed order may not leave a deposit in limbo — it goes to rent or to the balance, and both are stamped. Tests assert the three buckets sum to what was taken in.</text>
+</svg>

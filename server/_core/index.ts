@@ -339,9 +339,7 @@ async function startServer() {
     }, { timezone: cronTimezone });
     logger.info(`[Cron] Rental reminders scheduled for 9:00 AM daily (${cronTimezone})`);
 
-    logger.info(`[Cron] Birthday/holiday greetings scheduled for 08:00 daily (${cronTimezone})`);
-
-    // Quotation expiry — daily at 04:00 Toronto. Marks draft/sent quotes past
+    // Quotation expiry — daily at 04:00 local. Marks draft/sent quotes past
     // their validUntil as expired (status-only; does not block ordering).
     cron.default.schedule("0 4 * * *", async () => {
       try {
@@ -352,11 +350,6 @@ async function startServer() {
       }
     }, { timezone: cronTimezone });
     logger.info(`[Cron] Quotation expiry scheduled for 4:00 AM daily (${cronTimezone})`);
-
-    // Certificate status refresh — daily at 04:15 Toronto. Recomputes each
-    // fleet certificate's valid/expiring_soon/expired status from its expiry
-    // date so the expiring-soon view and filters stay truthful. Does NOT touch
-    logger.info(`[Cron] Certificate status refresh scheduled for 4:15 AM daily (${cronTimezone})`);
 
   } catch (error) {
     logger.warn("Cron scheduling failed (non-critical)", { error: error instanceof Error ? error.message : String(error) });

@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 300" width="980" height="300" role="img" aria-label="Rental order lifecycle: quote to order to active to return to closed, with the side effects each transition fires">
+  <style>
+    .bg    { fill: none; }
+    .box   { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.5; }
+    .box-a { fill: #eff6ff; stroke: #2563eb; stroke-width: 1.5; }
+    .box-t { fill: #f8fafc; stroke: #94a3b8; stroke-width: 1.5; stroke-dasharray: 4 3; }
+    .lbl   { font: 600 14px ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; fill: #0f172a; }
+    .sub   { font: 11px ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; fill: #64748b; }
+    .eff   { font: 11px ui-monospace, SFMono-Regular, Menlo, monospace; fill: #2563eb; }
+    .hdr   { font: 700 12px ui-sans-serif, system-ui, sans-serif; fill: #64748b; letter-spacing: .08em; }
+    .arrow { stroke: #94a3b8; stroke-width: 1.5; fill: none; marker-end: url(#a); }
+    @media (prefers-color-scheme: dark) {
+      .box   { fill: #0f172a; stroke: #334155; }
+      .box-a { fill: #172554; stroke: #3b82f6; }
+      .box-t { fill: #0b1220; stroke: #475569; }
+      .lbl   { fill: #e2e8f0; }
+      .sub   { fill: #94a3b8; }
+      .eff   { fill: #60a5fa; }
+      .hdr   { fill: #94a3b8; }
+      .arrow { stroke: #475569; }
+    }
+  </style>
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 0 L10 5 L0 10 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+
+  <text class="hdr" x="20" y="28">ORDER LIFECYCLE</text>
+
+  <g>
+    <rect class="box-t" x="20"  y="48" width="130" height="52" rx="8"/>
+    <text class="lbl" x="85" y="72" text-anchor="middle">quote</text>
+    <text class="sub" x="85" y="89" text-anchor="middle">optional</text>
+
+    <rect class="box"   x="184" y="48" width="130" height="52" rx="8"/>
+    <text class="lbl" x="249" y="72" text-anchor="middle">pending</text>
+    <text class="sub" x="249" y="89" text-anchor="middle">awaiting approval</text>
+
+    <rect class="box"   x="348" y="48" width="130" height="52" rx="8"/>
+    <text class="lbl" x="413" y="72" text-anchor="middle">approved</text>
+    <text class="sub" x="413" y="89" text-anchor="middle">unit reserved</text>
+
+    <rect class="box-a" x="512" y="48" width="130" height="52" rx="8"/>
+    <text class="lbl" x="577" y="72" text-anchor="middle">active</text>
+    <text class="sub" x="577" y="89" text-anchor="middle">out on rent</text>
+
+    <rect class="box"   x="676" y="48" width="130" height="52" rx="8"/>
+    <text class="lbl" x="741" y="72" text-anchor="middle">completed</text>
+    <text class="sub" x="741" y="89" text-anchor="middle">terminal</text>
+
+    <rect class="box-t" x="840" y="48" width="120" height="52" rx="8"/>
+    <text class="lbl" x="900" y="72" text-anchor="middle">cancelled</text>
+    <text class="sub" x="900" y="89" text-anchor="middle">terminal</text>
+  </g>
+
+  <path class="arrow" d="M150 74 H180"/>
+  <path class="arrow" d="M314 74 H344"/>
+  <path class="arrow" d="M478 74 H508"/>
+  <path class="arrow" d="M642 74 H672"/>
+  <path class="arrow" d="M806 74 H836"/>
+
+  <path class="arrow" d="M577 100 C577 130 620 130 620 100" />
+  <text class="sub" x="628" y="128">renew / swap</text>
+
+  <text class="hdr" x="20" y="152">SIDE EFFECTS</text>
+
+  <g>
+    <rect class="box" x="348" y="196" width="130" height="76" rx="8"/>
+    <text class="eff" x="360" y="216">contract PDF</text>
+    <text class="eff" x="360" y="234">order confirm</text>
+    <text class="eff" x="360" y="252">notification</text>
+
+    <rect class="box" x="676" y="196" width="130" height="76" rx="8"/>
+    <text class="eff" x="688" y="216">invoice</text>
+    <text class="eff" x="688" y="234">deposit → rent</text>
+    <text class="eff" x="688" y="252">notification</text>
+  </g>
+
+  <path class="arrow" d="M413 100 V192"/>
+  <path class="arrow" d="M741 100 V192"/>
+</svg>

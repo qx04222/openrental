@@ -53,6 +53,84 @@ const CUSTOMERS = [
   { name: "Tomás Rivera", company: null, phone: "555-010-1006", email: "t.rivera@example.com", city: "Toronto", province: "ON", industry: "individual", preferredLanguage: "en" },
 ];
 
+
+/**
+ * Orders spread across the lifecycle, so the dashboard, the availability view
+ * and the collections list all have something real to show. Dates are relative
+ * to "today" at seed time, which keeps the demo looking alive months from now.
+ */
+function daysFromNow(n: number): Date {
+  const d = new Date();
+  d.setHours(12, 0, 0, 0);
+  d.setDate(d.getDate() + n);
+  return d;
+}
+
+const ORDERS = [
+  // Running now — shows on the calendar and holds its unit.
+  { asset: "EX-102", customer: 0, start: -6,  end: 4,   status: "active" as const,    paid: "paid" as const,    fee: "3200.00", deposit: "800.00" },
+  { asset: "EX-103", customer: 1, start: -12, end: 2,   status: "active" as const,    paid: "partial" as const, fee: "5530.00", deposit: "1200.00" },
+  { asset: "SL-302", customer: 3, start: -3,  end: 11,  status: "active" as const,    paid: "pending" as const, fee: "3150.00", deposit: "700.00" },
+  // Booked but not out yet.
+  { asset: "CT-401", customer: 4, start: 3,   end: 17,  status: "approved" as const,  paid: "pending" as const, fee: "5740.00", deposit: "1400.00" },
+  // Came back, invoiced, and paid late — this is the one that lands on the
+  // collections screen with an aged balance.
+  { asset: "SS-201", customer: 2, start: -48, end: -34, status: "completed" as const, paid: "pending" as const, fee: "3990.00", deposit: "900.00" },
+  { asset: "SL-301", customer: 5, start: -26, end: -19, status: "completed" as const, paid: "paid" as const,    fee: "1225.00", deposit: "400.00" },
+  { asset: "AU-501", customer: 0, start: -20, end: -17, status: "completed" as const, paid: "paid" as const,    fee: "285.00",  deposit: "150.00" },
+];
+
+async function seedOrders(db: NonNullable<Awaited<ReturnType<typeof getDb>>>) {
+  const fleet = await db.select().from(schema.rentalFleet);
+  const byAsset = new Map(fleet.map((f) => [f.assetNumber, f]));
+  const customers = await db.select().from(schema.customers).orderBy(schema.customers.id);
+
+  let made = 0;
+  for (const [i, o] of ORDERS.entries()) {
+    const asset = byAsset.get(o.asset);
+    const customer = customers[o.customer];
+    if (!asset || !customer) continue;
+
+    const start = daysFromNow(o.start);
+    const rentalNumber = `${start.toISOString().slice(0, 10).replace(/-/g, "")}D${String.fromCharCode(65 + i)}`;
+
+    const existing = await db
+      .select({ id: schema.rentalRequests.id })
+      .from(schema.rentalRequests)
+      .where(eq(schema.rentalRequests.rentalNumber, rentalNumber))
+      .limit(1);
+    if (existing.length) continue;
+
+    // Ontario HST at 13% on the pre-tax total, matching the live tax engine's
+    // default. Insurance is the configurable rate applied to rent.
+    const fee = Number(o.fee);
+    const insurance = Math.round(fee * 0.15 * 100) / 100;
+    const preTax = fee + insurance;
+    const tax = Math.round(preTax * 0.13 * 100) / 100;
+
+    await db.insert(schema.rentalRequests).values({
+      rentalNumber,
+      customerId: customer.id,
+      customerName: customer.company || customer.name,
+      customerPhone: customer.phone,
+      customerEmail: customer.email,
+      rentalFleetId: asset.id,
+      startDate: start,
+      endDate: daysFromNow(o.end),
+      status: o.status,
+      paymentStatus: o.paid,
+      rentalFee: o.fee,
+      insuranceCost: insurance.toFixed(2),
+      taxAmount: tax.toFixed(2),
+      totalAmount: (preTax + tax).toFixed(2),
+      depositAmount: o.deposit,
+      deliveryMethod: "pickup",
+    });
+    made++;
+  }
+  console.log(`  orders: ${made}`);
+}
+
 async function seedDemo() {
   const db = await getDb();
   if (!db) {
@@ -96,6 +174,45 @@ async function seedDemo() {
     });
   }
   console.log(`  customers: ${CUSTOMERS.length}`);
+
+  await seedOrders(db);
+
+  // Invoice the finished orders through the real generator rather than
+  // inserting invoice rows by hand — that way the demo exercises the same tax,
+  // deposit and numbering logic a real order would, and the invoice and
+  // collections screens show something internally consistent.
+  const { generateInvoiceFromRental } = await import("../services/invoiceGenerator");
+  const finished = await db
+    .select({ id: schema.rentalRequests.id })
+    .from(schema.rentalRequests)
+    .where(eq(schema.rentalRequests.status, "completed"));
+  let invoiced = 0;
+  for (const r of finished) {
+    try {
+      await generateInvoiceFromRental({ rentalId: r.id });
+      invoiced++;
+    } catch (err) {
+      console.warn(`  (could not invoice rental #${r.id}: ${err instanceof Error ? err.message : String(err)})`);
+    }
+  }
+  console.log(`  invoices: ${invoiced}`);
+
+  // Age the oldest invoice past its due date so the collections screen has
+  // something to show. Backdating here is deliberate and demo-only: the
+  // generator always issues as of today, and an empty collections list tells a
+  // reader nothing about what the feature does.
+  const [oldest] = await db
+    .select({ id: schema.invoices.id })
+    .from(schema.invoices)
+    .orderBy(schema.invoices.id)
+    .limit(1);
+  if (oldest) {
+    await db
+      .update(schema.invoices)
+      .set({ issueDate: daysFromNow(-38), dueDate: daysFromNow(-8), status: "sent" })
+      .where(eq(schema.invoices.id, oldest.id));
+    console.log("  aged 1 invoice past due (collections demo)");
+  }
 
   console.log("Demo seed complete. Sign in with admin / admin123 and change the password.");
   process.exit(0);

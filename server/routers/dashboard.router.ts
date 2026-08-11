@@ -201,7 +201,7 @@ export const dashboardRouter = router({
       db.select({
         totalCustomers: sql<number>`count(*)::int`,
         returningCustomers: sql<number>`count(*) filter (where ${schema.customers.totalRentals} > 1)::int`,
-        newThisMonth: sql<number>`count(*) filter (where ((${schema.customers.createdAt} AT TIME ZONE 'UTC') AT TIME ZONE ${APP_TIMEZONE_SQL}) >= date_trunc('month', now() AT TIME ZONE ${APP_TIMEZONE_SQL}))::int`,
+        newThisMonth: sql<number>`count(*) filter (where ((${schema.customers.createdAt} AT TIME ZONE 'UTC') AT TIME ZONE ${sql.raw(APP_TIMEZONE_SQL)}) >= date_trunc('month', now() AT TIME ZONE ${sql.raw(APP_TIMEZONE_SQL)}))::int`,
       }).from(schema.customers).where(isNull(schema.customers.deletedAt)),
 
       // Overdue follow-ups (top 5)

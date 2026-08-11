@@ -258,6 +258,8 @@ export const reportsRouter = router({
 
     const df = buildFilters(input, "createdAt");
     // Default to the trailing 12 months only when no explicit date range is set.
+    /* sql-raw-fragment — concatenated into a sql.raw() query below, so the
+       timezone is inlined here rather than wrapped in sql.raw(). */
     const window = input?.startDate
       ? ""
       : ` AND (("createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${APP_TIMEZONE_SQL}) >= date_trunc('month', now() AT TIME ZONE ${APP_TIMEZONE_SQL}) - INTERVAL '11 months'`;
@@ -552,7 +554,7 @@ export const reportsRouter = router({
       SELECT MIN("startDate") AS first
       FROM rental_requests
       WHERE "deletedAt" IS NULL
-        AND date_part('year', "startDate") = date_part('year', now() AT TIME ZONE ${APP_TIMEZONE_SQL})
+        AND date_part('year', "startDate") = date_part('year', now() AT TIME ZONE ${sql.raw(APP_TIMEZONE_SQL)})
     `);
     const first = row?.first ? new Date(String(row.first)) : null;
     return { date: first && !Number.isNaN(first.getTime()) ? first.toISOString() : null };
@@ -587,7 +589,7 @@ export const reportsRouter = router({
         const [row]: Record<string, unknown>[] = await db.execute(sql`
           SELECT MIN("startDate") AS first FROM rental_requests
           WHERE "deletedAt" IS NULL
-            AND date_part('year', "startDate") = date_part('year', now() AT TIME ZONE ${APP_TIMEZONE_SQL})`);
+            AND date_part('year', "startDate") = date_part('year', now() AT TIME ZONE ${sql.raw(APP_TIMEZONE_SQL)})`);
         const first = row?.first ? new Date(String(row.first)) : null;
         windowStart = first && !Number.isNaN(first.getTime())
           ? first
@@ -1341,6 +1343,7 @@ export const reportsRouter = router({
       const df = buildFilters(input, "createdAt");
 
       // Shared base CTE: taxable amount (deposits excluded), recorded tax.
+      /* sql-raw-fragment — assembled here, executed via sql.raw() below. */
       const baseCte = `
         WITH base AS (
           SELECT
@@ -1453,7 +1456,7 @@ export const reportsRouter = router({
           COALESCE("financialOrderNumber", "rentalNumber") AS order_no,
           "customerName",
           "depositAmount"::numeric AS deposit,
-          ("startDate" AT TIME ZONE 'UTC') AT TIME ZONE ${APP_TIMEZONE_SQL} AS start_local
+          ("startDate" AT TIME ZONE 'UTC') AT TIME ZONE ${sql.raw(APP_TIMEZONE_SQL)} AS start_local
         FROM rental_requests
         WHERE "deletedAt" IS NULL
           AND status = 'active'
@@ -1765,7 +1768,7 @@ export const reportsRouter = router({
     if (!db) return [];
     const rows: Record<string, unknown>[] = await db.execute(sql`
       SELECT
-        to_char(date_trunc('month', ((i."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${APP_TIMEZONE_SQL})), 'YYYY-MM') AS month,
+        to_char(date_trunc('month', ((i."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${sql.raw(APP_TIMEZONE_SQL)})), 'YYYY-MM') AS month,
         COUNT(*)::int AS inspections,
         COUNT(CASE WHEN i."overallCondition" = 'excellent' THEN 1 END)::int AS excellent,
         COUNT(CASE WHEN i."overallCondition" = 'good' THEN 1 END)::int AS good,
@@ -1774,9 +1777,9 @@ export const reportsRouter = router({
         COUNT(CASE WHEN i."damageSeverity" IN ('minor', 'moderate', 'severe') THEN 1 END)::int AS "withDamage"
       FROM inspections i
       WHERE i."deletedAt" IS NULL
-        AND ((i."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${APP_TIMEZONE_SQL}) >= date_trunc('month', now() AT TIME ZONE ${APP_TIMEZONE_SQL}) - INTERVAL '11 months'
-      GROUP BY date_trunc('month', ((i."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${APP_TIMEZONE_SQL}))
-      ORDER BY date_trunc('month', ((i."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${APP_TIMEZONE_SQL})) ASC
+        AND ((i."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${sql.raw(APP_TIMEZONE_SQL)}) >= date_trunc('month', now() AT TIME ZONE ${sql.raw(APP_TIMEZONE_SQL)}) - INTERVAL '11 months'
+      GROUP BY date_trunc('month', ((i."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${sql.raw(APP_TIMEZONE_SQL)}))
+      ORDER BY date_trunc('month', ((i."createdAt" AT TIME ZONE 'UTC') AT TIME ZONE ${sql.raw(APP_TIMEZONE_SQL)})) ASC
     `);
     return rows.map((r) => ({
       month: String(r.month),

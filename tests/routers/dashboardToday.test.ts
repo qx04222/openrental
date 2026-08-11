@@ -51,7 +51,7 @@ vi.mock("../../server/db", () => ({
   isNull: vi.fn((..._args: unknown[]) => "isNull"),
   isNotNull: vi.fn((..._args: unknown[]) => "isNotNull"),
   desc: vi.fn((..._args: unknown[]) => "desc"),
-  sql: vi.fn((..._args: unknown[]) => "sql"),
+  sql: Object.assign(vi.fn((..._args: unknown[]) => "sql"), { raw: (v: string) => v }),
 }));
 
 vi.mock("../../drizzle/schema", () => {

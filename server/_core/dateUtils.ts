@@ -28,9 +28,16 @@ function resolveAppTimezone(): string {
 export const APP_TIMEZONE = resolveAppTimezone();
 
 /**
- * The same value, quoted for direct use inside a SQL string. Safe because
- * resolveAppTimezone() already rejected anything Intl does not recognise as a
- * timezone, and IANA zone ids contain no quotes.
+ * The zone as a quoted SQL literal, for `AT TIME ZONE` clauses.
+ *
+ * It must be INLINED, never bound. Drizzle turns `${x}` inside a sql`` template
+ * into a bind parameter, and `AT TIME ZONE $1` then receives the string with
+ * its quote characters intact — Postgres rejects it and the whole dashboard
+ * query 500s. Inside a sql`` template, wrap this in `sql.raw()`; inside a plain
+ * JS string that is later handed to sql.raw(), interpolate it directly.
+ *
+ * Safe to inline because resolveAppTimezone() already rejected anything Intl
+ * does not recognise as a timezone, and IANA zone ids contain no quotes.
  */
 export const APP_TIMEZONE_SQL = `'${APP_TIMEZONE}'`;
 

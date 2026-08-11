@@ -117,13 +117,13 @@ export const loginSessionsRouter = router({
       // Logins by day
       const loginsByDay = await db
         .select({
-          date: sql<string>`to_char(date_trunc('day', (("loginAt" AT TIME ZONE 'UTC') AT TIME ZONE ${APP_TIMEZONE_SQL})), 'YYYY-MM-DD')`,
+          date: sql<string>`to_char(date_trunc('day', (("loginAt" AT TIME ZONE 'UTC') AT TIME ZONE ${sql.raw(APP_TIMEZONE_SQL)})), 'YYYY-MM-DD')`,
           count: sql<number>`count(*)::int`,
         })
         .from(schema.loginSessions)
         .where(sinceCondition)
-        .groupBy(sql`date_trunc('day', (("loginAt" AT TIME ZONE 'UTC') AT TIME ZONE ${APP_TIMEZONE_SQL}))`)
-        .orderBy(sql`date_trunc('day', (("loginAt" AT TIME ZONE 'UTC') AT TIME ZONE ${APP_TIMEZONE_SQL}))`);
+        .groupBy(sql`date_trunc('day', (("loginAt" AT TIME ZONE 'UTC') AT TIME ZONE ${sql.raw(APP_TIMEZONE_SQL)}))`)
+        .orderBy(sql`date_trunc('day', (("loginAt" AT TIME ZONE 'UTC') AT TIME ZONE ${sql.raw(APP_TIMEZONE_SQL)}))`);
 
       // Top users
       const topUsers = await db

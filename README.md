@@ -1,8 +1,56 @@
-# OpenRental
+<div align="center">
 
-**Self-hostable equipment rental management, built for how North American yards actually run.**
+<img src="docs/assets/logo-wide.png" alt="OpenRental" width="400">
 
-Fleet ledger, order lifecycle, tiered pricing, invoicing, deposits and receivables — plus an offline-capable field PWA for inspections and signatures. Apache-2.0.
+### Equipment rental management, built for how North American yards actually run
+
+Fleet ledger · order lifecycle · tiered pricing · invoicing & deposits · receivables · offline field PWA
+
+[![CI](https://github.com/qx04222/openrental/actions/workflows/ci.yml/badge.svg)](https://github.com/qx04222/openrental/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
+[![Tests](https://img.shields.io/badge/tests-1%2C433%20passing-brightgreen.svg)](#verify-it-yourself)
+[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6.svg)](tsconfig.json)
+[![Postgres](https://img.shields.io/badge/Postgres-14%2B-336791.svg)](sql/000_baseline.sql)
+
+**[Quick start](#quick-start) · [What you get](#what-you-get) · [Why North America](#why-north-america) · [Contributing](CONTRIBUTING.md)**
+
+</div>
+
+---
+
+<img src="docs/assets/dashboard.png" alt="Dashboard showing revenue, fleet availability, active rentals and recent order activity">
+
+## Three things that make this different
+
+<table>
+<tr>
+<td width="33%" valign="top">
+
+### 💵 The money always adds up
+
+Every dollar a customer pays is in exactly one of three places — allocated to an invoice, held as a deposit, or on their credit balance. Tests assert the sum. A closed order **cannot** leave a deposit in limbo.
+
+</td>
+<td width="33%" valign="top">
+
+### 🔇 Silence is never success
+
+A status field records bookkeeping state; a separate timestamp records delivery fact. A failed query renders as an error, never as `0`. Both rules exist because this system was burned by the alternative.
+
+</td>
+<td width="33%" valign="top">
+
+### 🇨🇦 Built here, not localized later
+
+Per-province GST/PST/HST with the breakdown stored on the invoice. Rental days are local calendar days. Deposits, damage claims and signature evidence follow North American rental practice.
+
+</td>
+</tr>
+</table>
+
+---
+
+## Quick start
 
 ```bash
 git clone https://github.com/qx04222/openrental.git && cd openrental
@@ -10,118 +58,131 @@ cp .env.example .env          # set DATABASE_URL
 npm install
 npm run db:baseline           # one SQL file, 63 tables
 npm run seed && npm run seed:demo
-npm run dev                   # → http://localhost:3000/admin  (admin / admin123)
+npm run dev                   # → localhost:3000/admin   (admin / admin123)
 ```
+
+Or evaluate it without installing a toolchain:
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/qx04222/openrental)
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template?template=https://github.com/qx04222/openrental)
+
+Both give you a private instance with its own Postgres. After the first deploy, open a shell on the service and run `npm run db:baseline && npm run seed && npm run seed:demo`.
+
+Locally, with Docker:
+
+```bash
+docker compose up --build
+docker compose exec app sh -c 'npm run db:baseline && npm run seed && npm run seed:demo'
+```
+
+The demo seed loads a fictional yard — ten machines across five categories, six customers, orders at every stage of the lifecycle, and one invoice deliberately aged past due — so every screen has something real on the first run.
 
 ---
 
-## Why another rental system
+## What you get
 
-Most open-source "rental" projects are booking calendars. Renting machines is not booking: a unit leaves the yard on a Tuesday, comes back damaged and half-fuelled on the following Monday, the customer already paid a deposit, the damage becomes a charge, the charge becomes a credit note, and someone has to phone them in six weeks because the invoice is still open.
+### Orders that survive contact with reality
 
-OpenRental was extracted from a system that had been running a real equipment rental business daily — through renewals, mid-rental swaps, disputed damage, overdue returns and month-end reconciliation. The parts that survive here are the parts that survived contact with those problems. **All of the original company's data, branding and customer records were removed before this repository was created** — see [Provenance](#provenance).
+<img src="docs/assets/rental-management.png" alt="Rental management list with an operational-health banner naming orders that are missing a required step">
 
-## Built for North America
+Renting machines is not booking. A unit goes out Tuesday, comes back damaged and half-fuelled the following Monday, the customer already paid a deposit, the damage becomes a charge, the charge becomes a credit note, and six weeks later somebody has to phone them because the invoice is still open. All of that is modelled.
 
-This is not a generic system with a currency dropdown bolted on. The tax, calendar and document conventions are the ones a Canadian or US yard actually needs:
+The banner at the top is the system naming orders that were started and then stalled — the class of work that quietly rots in every rental business.
 
-- **Canadian tax engine, province by province.** `tax_rates` models GST, PST and HST separately, because they do not compose the same way — a province with HST gets a single line; a province with GST + PST gets two. The tax breakdown is stored on the invoice, not recomputed at print time, so a reprint six months later still shows what the customer was actually charged.
-- **A rental day is a local calendar day.** A machine returned at 8pm on the 3rd is a three-day rental whether or not UTC has already rolled over. One timezone is authoritative for every date field, set once via `APP_TIMEZONE` — `America/Toronto`, `America/Vancouver`, `America/Chicago`, `America/Phoenix`, whatever your yard runs on. An invalid zone fails at boot rather than silently shifting every invoice by a day.
-- **Deposits behave like North American rental deposits.** Held against the order, tiered by rental length, then either applied to the rent or moved onto the customer's account balance when the order closes — never silently absorbed. Money the customer has paid but not yet consumed is tracked as a liability, not as revenue.
-- **Damage and fuel become documents, not arguments.** A return inspection with a fuel deficit or damage generates a claim; the claim becomes an invoice line or a waiver; a waiver on an already-issued invoice issues an offsetting credit note rather than editing history.
-- **Signature evidence you could hand to a lawyer.** Contract signing captures the signature, the document hash, IP, user agent and timestamp, so "they agreed to the damage terms" is a record rather than a recollection.
-- **Bilingual English / Chinese out of the box** (`en`, `zh`), including the customer-facing documents. A large share of independent rental operators in the GTA, Vancouver and California run bilingual front counters.
+<img src="docs/assets/order-detail.png" alt="Order detail showing equipment lifecycle progress, customer, rental period and a price summary with insurance, tax and deposit broken out">
 
-**Not yet:** US state and local sales tax is not modeled — the tax engine is Canada-first. Adding a US rate strategy behind the same `taxCalculation` interface is a well-scoped, high-value first contribution. See [`good first issue`](../../labels/good%20first%20issue).
+One order, one screen: where the machine is in its lifecycle, what the customer owes, and how the total was built — rent, insurance, tax and deposit each on their own line instead of rolled into a number nobody can check.
 
-## What is actually in here
+### The lifecycle, and what each transition fires
+
+<img src="docs/assets/lifecycle.svg" alt="Order lifecycle diagram: quote, pending, approved, active, completed, cancelled, with side effects attached to approved and completed">
+
+Side effects are **claimed, executed, then settled**. If the process dies between generating the contract and writing the invoice, a retry cron finishes the unsettled half instead of leaving the order in a state nobody can reason about.
+
+### Money you can audit
+
+<img src="docs/assets/money.svg" alt="Diagram: a customer payment splits into allocated-to-invoice, held-as-deposit, or customer credit balance; a held deposit resolves to rent or to the balance">
+
+Issued financial documents are append-only. A waived charge on an issued invoice becomes an offsetting credit note — history is never edited.
+
+### Receivables with a phone number attached
+
+<img src="docs/assets/collections.png" alt="Collections screen ranking overdue customers by amount owed times days late, with phone numbers and contact history">
+
+Ranked by **amount owed × days late**, because either dimension alone buries the other: a $200 invoice ninety days old and a $9,000 invoice two days old both deserve a call today. Each row carries the phone number, the invoices behind the balance, and what the customer said last time. Log a follow-up date and they collapse out of today's list until it arrives.
+
+### A field PWA that works without signal
+
+<div align="center"><img src="docs/assets/field-pwa.png" alt="Field PWA login screen on a phone" width="250"></div>
+
+Dispatch and return inspections on a phone: photos, hour meter, fuel level, condition, customer signature. Inspections queue in IndexedDB and sync when the device gets signal — which on a job site is the normal case, not the edge case.
+
+### And the rest
 
 | Area | What it does |
 |---|---|
-| **Fleet ledger** | Assets, categories, attachments, serial/asset numbers, engine hours, condition, maintenance windows. Availability is derived from real blockers — an open work order holds the unit, and the list badge and the dropdown cannot disagree. |
-| **Order lifecycle** | Quote → order → active → return → close, with side effects (contract PDF, invoice, notifications) modelled as claimable, settleable effects so a crash mid-transition retries instead of half-applying. Renewals, mid-rental swaps and open-ended rolling rentals included. |
-| **Pricing** | Day / week / month / 28-day tiers, per-category defaults, customer-specific contract rates, promotions and referral discounts, delivery priced by distance band, insurance as a configurable rate. Multi-unit orders apportion correctly. |
-| **Money** | Invoices with stored tax breakdown, prepayments, deposits, credit notes, a customer credit ledger, late fees, and a collections view ranked by amount × days late. Conservation is enforced by tests: every dollar taken in is either allocated, held, or on the customer's balance. |
-| **Field PWA** | Dispatch and return inspections on a phone: photos, hour meter, fuel level, condition, customer signature. Works offline — inspections queue in IndexedDB and sync when the device gets signal, which is the normal case on a job site. |
-| **Back office** | Role-based permissions (5 roles, per-module CRUD, per-user overrides), full audit log, recycle bin with restore, work orders, damage claims, a work queue that surfaces anything created and then stalled. |
+| **Fleet ledger** | Assets, categories, attachments, serials, engine hours, maintenance windows. Availability is *derived* from real blockers, so the list badge and the assignment dropdown cannot disagree. |
+| **Pricing** | Day / week / month / 28-day tiers, per-category defaults, customer contract rates, promotions, referral discounts, distance-banded delivery, configurable insurance. Multi-unit orders apportion correctly. |
+| **Back office** | Five roles with per-module CRUD and per-user overrides, full audit log, recycle bin with restore, work orders, damage claims. |
 | **Reports** | Utilization, fleet ROI, revenue by category and by customer industry, financing plans, aged receivables. |
+| **Customer portal** | Phone-OTP login, own orders and invoices, optional card checkout. |
 
-63 tables, ~80k lines of TypeScript, **1,429 tests**.
+**63 tables · ~80k lines of TypeScript · 1,433 tests.**
 
-## Design decisions worth knowing before you contribute
+---
 
-These are opinions the codebase holds on purpose. Understanding them will save you a rejected PR.
+## Why North America
 
-**Silence is not success.** The single most expensive class of bug in this system's history was work that looked done and wasn't: reminders marked "sent" while the SMS channel was switched off, a stats query that crashed and rendered as six confident zeroes, invoices labelled "sent" that had never been emailed. So: a status field records *bookkeeping state*, a separate timestamp records *delivery fact*, and a failed query renders as an error, never as `0`. If you add an integration, record what the provider confirmed — not what you intended.
+Not a generic system with a currency dropdown bolted on.
 
-**Money is never silently dropped.** Aggregates that join are checked against the raw ledger. When rows can't join (an invoice with no customer attached), they get their own bucket and stay in the headline total. There are tests that exist purely to fail if a total starts under-reporting.
+- **Canadian tax, province by province.** `tax_rates` models GST, PST and HST separately, because they do not compose the same way — an HST province gets one line, a GST + PST province gets two. The breakdown is **stored on the invoice**, so a reprint six months later shows what the customer was actually charged, not what today's rates would produce.
+- **A rental day is a local calendar day.** A machine returned at 8pm on the 3rd is a three-day rental whether or not UTC has rolled over. One timezone is authoritative, set once via `APP_TIMEZONE` — Toronto, Vancouver, Chicago, Phoenix, whatever your yard runs on. An invalid zone **fails at boot** rather than silently shifting every invoice by a day.
+- **Deposits behave like rental deposits.** Held against the order, tiered by rental length, then explicitly applied to rent or moved to the customer's balance when the order closes. Money paid but not yet earned is tracked as a liability.
+- **Damage and fuel become documents, not arguments.** A return inspection with a deficit generates a claim; the claim becomes an invoice line or a waiver.
+- **Signature evidence you could hand to a lawyer.** Signature, document hash, IP, user agent, timestamp.
+- **Bilingual English / Chinese**, including customer-facing documents — a large share of independent operators in the GTA, Greater Vancouver and California run bilingual front counters.
 
-**Migrations are hand-written and idempotent.** `sql/NNN_*.sql`, guarded so re-running the folder is safe. `drizzle/schema.ts` is a hand-maintained mirror for the typed query builder — **`drizzle-kit push` is not used and will drift your schema**. The whole history is flattened into `sql/000_baseline.sql`; everything after it is incremental.
+> **Not yet:** US state and local sales tax is not modelled — the tax engine is Canada-first. Adding a US strategy behind the existing `taxCalculation` interface is a well-scoped, high-value first contribution. → [`good first issue`](https://github.com/qx04222/openrental/labels/good%20first%20issue)
 
-**`npm run build` is part of the definition of done.** Type-check and unit tests do not catch bundler-only errors. CI runs the build; so should you.
+---
 
-**Comments explain why, not what.** Most non-obvious lines in this codebase have a comment naming the incident that produced them. Keep that up — it is the difference between a codebase you can inherit and one you have to re-derive.
+## Verify it yourself
+
+```bash
+npm run verify   # tsc + eslint + 1,433 tests + production build
+```
+
+The build step is not redundant with the type check — esbuild and Vite catch a class of error `tsc` does not see. CI runs all four, and it also applies the baseline schema and both seeds against a fresh Postgres, so "it installs from scratch" is verified on every commit rather than assumed.
+
+---
 
 ## Stack
 
-TypeScript end to end. Express + tRPC on the server, Drizzle ORM over PostgreSQL, React + Vite + Tailwind on the client, Vitest for tests, PDFKit for documents. Deploys as a single Node process behind any Postgres — there is nothing cloud-vendor-specific in the runtime.
+TypeScript end to end: Express + tRPC, Drizzle over PostgreSQL, React + Vite + Tailwind, Vitest, PDFKit. Ships as a single Node process behind any Postgres — nothing in the runtime is tied to a cloud vendor.
 
-Optional integrations, all off by default and all degrading to a no-op when unconfigured: Resend (email), Telnyx (SMS), Stripe (card payment), Supabase Storage (photos and PDFs).
+Optional integrations, every one off by default and visibly off rather than silently no-op: Resend (email), Telnyx (SMS), Stripe (card), Supabase Storage (photos and PDFs).
 
-## Getting set up properly
-
-```bash
-# 1. Postgres 14+
-createdb openrental
-
-# 2. Configure
-cp .env.example .env
-#   DATABASE_URL   required
-#   APP_TIMEZONE   your yard's IANA zone (default America/Toronto)
-#   everything else optional — unset integrations simply stay dark
-
-# 3. Schema + data
-npm run db:baseline     # sql/000_baseline.sql
-npm run seed            # admin user, one warehouse, site settings
-npm run seed:demo       # optional fictional fleet / customers, so screens aren't empty
-
-# 4. Run
-npm run dev
-```
-
-Sign in at `/admin` with `admin` / `admin123` and change the password immediately. The field PWA is at `/field-access` (phone-number login, `inspector` seed user).
-
-Verify a change the way CI does:
-
-```bash
-npm run check    # tsc
-npm run lint
-npm test         # 1,429 tests
-npm run build    # bundler-only errors live here
-```
+---
 
 ## Provenance
 
-OpenRental was extracted from a production system operated by a single rental company. Before this repository existed, the following were removed and **the git history was not carried over** — this repo starts at commit one:
+OpenRental was extracted from a system that ran a real rental business daily. **This repository starts at commit one on purpose** — the original history contained real customer names, phone numbers and addresses, so none of it was carried over. Removed before this repo existed: every real customer and order, the original branding and marketing site, one-off production data-repair migrations, and integrations with that operator's internal systems.
 
-- every real customer name, phone number, address and order
-- the original company's branding, domain, contact details and marketing site
-- one-off production data-repair migrations
-- internal integrations with that company's other systems
+Every company, person, phone number and address in the seeds, fixtures, tests and docs is invented; phone numbers use the `555-01xx` range reserved for fiction. If you find anything that looks like it identifies a real person or business, please report it privately — see [SECURITY.md](SECURITY.md).
 
-Every company, person, phone number and address in the seeds, fixtures, tests and docs is invented. Phone numbers use the `555-01xx` range reserved for fiction. If you find anything that looks like it identifies a real person or business, please report it privately — see [SECURITY.md](SECURITY.md).
+---
 
 ## Contributing
 
-Issues and PRs welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) first — it is short, and it explains the test expectations, the migration rules and how to run the e2e suite against a scratch database.
-
-Good places to start:
+Issues and PRs welcome — start with [CONTRIBUTING.md](CONTRIBUTING.md). Good places to begin:
 
 - **US sales tax** behind the existing `taxCalculation` interface
 - **A second notification provider** (Twilio, SendGrid) following the delivery-fact pattern
-- **Metric/imperial toggle** for hour meters, weights and dimensions
+- **Metric / imperial toggle** for hour meters, weights and dimensions
 - **Accessibility pass** on the admin tables
+
+Docs: [architecture map](docs/index.md) · [rentals](docs/modules/rentals.md) · [money](docs/modules/money.md) · [customers](docs/modules/customers.md) · [database](docs/modules/database.md)
 
 ## License
 
-[Apache License 2.0](LICENSE). Use it commercially, fork it, run it for your own yard. If you improve it, a PR back is appreciated but not required.
+[Apache-2.0](LICENSE). Use it commercially, fork it, run your own yard on it. A PR back is appreciated, never required.
