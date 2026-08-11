@@ -53,7 +53,7 @@
     "express": "^4.21.2",
     "i18next": "^25.8.13",
     "i18next-browser-languagedetector": "^8.2.1",
-    "jose": "6.2.4",
+    "jose": "6.2.8",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
     "lucide-react": "^0.453.0",
