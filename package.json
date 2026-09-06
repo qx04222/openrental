@@ -57,7 +57,7 @@
     "jose": "6.2.4",
     "jspdf": "^4.2.1",
     "jspdf-autotable": "^5.0.8",
-    "lucide-react": "^0.453.0",
+    "lucide-react": "^1.39.0",
     "nanoid": "^5.1.11",
     "node-cron": "^4.6.0",
     "pdfkit": "^0.19.1",
