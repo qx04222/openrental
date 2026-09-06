@@ -63,7 +63,6 @@
   "odometerLabel": "里程表：",
   "createdLabel": "创建时间：",
   "rentalLabel": "租赁：",
-
   "field.title": "设备检查",
   "field.type": "类型",
   "field.equipment": "设备",
@@ -129,7 +128,6 @@
   "field.fromFleetList": "所有设备",
   "field.selectRentalOrder": "选择租赁订单",
   "field.noActiveRentals": "暂无进行中的租赁订单",
-
   "staff.verifying": "正在验证检查令牌...",
   "staff.invalidToken": "无效凭证",
   "staff.invalidMessage": "此检查链接无效、已过期或已被使用。",
@@ -168,7 +166,6 @@
   "staff.locationError": "无法获取位置",
   "staff.submitSuccess": "检查已成功提交！",
   "staff.submitError": "提交检查失败：",
-
   "fleetHistory.title": "设备检查记录",
   "fleetHistory.subtitle": "完整检查记录",
   "fleetHistory.viewFull": "完整记录",
@@ -184,7 +181,6 @@
   "fleetHistory.damageNotes": "损坏备注",
   "fleetHistory.allInspections": "全部检查记录",
   "fleetHistory.noInspections": "此设备暂无检查记录",
-
   "tokenDeleted": "凭证已删除",
   "tokensDeleted": "已删除 {{count}} 个凭证",
   "deleteToken": "删除凭证",
@@ -195,7 +191,6 @@
   "downloadPDF": "下载PDF",
   "inspectionsDeleted": "已删除 {{count}} 条检查记录",
   "deleteInspectionsConfirm": "确定要删除 {{count}} 条检查记录吗？此操作不可撤销。",
-
   "field.fuelChargeCalc": "燃油费用计算",
   "field.fuelDeficit": "燃油不足量",
   "field.tankCapacity": "油箱容量",
@@ -206,7 +201,6 @@
   "field.fuelChargeLabel": "燃油费用",
   "field.damageClaimWillCreate": "提交后将自动创建损坏索赔",
   "field.damageClaimLabel": "损坏索赔",
-
   "fuelCharge": "燃油费用",
   "fuelChargeAutoInvoice": "此检查已自动生成燃油附加费发票",
   "damageClaimCreated": "损坏索赔已创建",
@@ -214,5 +208,6 @@
   "editInspection": "编辑",
   "newAdminInspection": "代司机录入",
   "openEditor": "打开编辑器",
-  "adminInspectionPickerNeedsId": "至少填写 租赁ID 或 车辆ID"
+  "adminInspectionPickerNeedsId": "至少填写 租赁ID 或 车辆ID",
+  "field.offlineSaveFailed": "无法保存到此设备。请保留当前表单并重试。"
 }

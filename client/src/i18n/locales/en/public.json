@@ -22,7 +22,6 @@
   "fieldAccess.resendIn": "Resend in {{seconds}}s",
   "fieldAccess.verify": "Verify",
   "fieldAccess.verifying": "Verifying...",
-
   "fieldDashboard.title": "Field Inspector",
   "fieldDashboard.pendingSync": "inspection(s) pending sync",
   "fieldDashboard.startInspection": "Start Inspection",
@@ -36,7 +35,6 @@
   "fieldDashboard.noScheduleToday": "No equipment actions scheduled for today",
   "fieldDashboard.online": "Online",
   "fieldDashboard.offline": "Offline",
-
   "fieldDeliveries.title": "My Deliveries",
   "fieldDeliveries.subtitle": "Your assigned dispatch orders",
   "fieldDeliveries.progressTitle": "Equipment operations",
@@ -65,7 +63,6 @@
   "fieldDeliveries.deliveryMethod": "Delivery Method",
   "fieldDeliveries.distance": "Distance",
   "fieldDeliveries.callCustomer": "Call",
-
   "rentalStatus.eyebrow": "Order Tracking · Real-Time Status",
   "rentalStatus.title": "Check Order Status",
   "rentalStatus.subtitle": "Enter your order number and email to view or modify your rental.",
@@ -113,5 +110,6 @@
   "rentalStatus.insuranceNone": "No insurance",
   "rentalStatus.insuranceBasic": "Basic insurance",
   "rentalStatus.insuranceFull": "Full coverage insurance",
-  "rentalStatus.myAccount": "My Account"
+  "rentalStatus.myAccount": "My Account",
+  "fieldDashboard.syncNow": "Sync now"
 }

@@ -1,7 +1,8 @@
+import QueryState from "@/components/QueryState";
+import OperationsDesk from "@/components/OperationsDesk";
 import DashboardLayout from "@/components/DashboardLayout";
 import { trpc } from "@/lib/trpc";
 import { useTranslation } from "react-i18next";
-import { useBranding } from "@/config/branding";
 import { Package, FileText, DollarSign, AlertCircle, Users, UserCheck, UserPlus, CalendarClock, TrendingUp, Activity, Truck, ClipboardCheck, PackageCheck, CalendarPlus, CalendarMinus, ArrowRight } from "lucide-react";
 import { formatCurrency } from "@/lib/pricing";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
@@ -18,8 +19,8 @@ export default function Dashboard() {
 
 function DashboardDesktop() {
   const { t } = useTranslation(["dashboard", "dispatch", "common"]);
-  const branding = useBranding();
-  const { data } = trpc.dashboard.stats.useQuery();
+  const statsQuery = trpc.dashboard.stats.useQuery(undefined, { refetchInterval: 60_000 });
+  const { data: data } = statsQuery;
   const { data: todayData } = trpc.dashboard.todaySchedule.useQuery();
   const showTodayPanel = useFeatureFlag("today_dashboard");
   const dispatchWorkflowEnabled = useFeatureFlag("dispatch_workflow");
@@ -77,13 +78,15 @@ function DashboardDesktop() {
     { key: "customerOverdue", label: t("rentalOperations.customerOverdue"), icon: AlertCircle, value: data?.rentals.customerOverdue ?? 0, tone: "text-red-700", rail: "bg-red-500", href: "/admin/rental-management?tab=active" },
   ];
 
+  if (statsQuery.isPending || statsQuery.isError || !data) return <DashboardLayout><QueryState loading={statsQuery.isPending} onRetry={() => void statsQuery.refetch()} /></DashboardLayout>;
+
   return (
     <DashboardLayout>
       <div className="space-y-8">
+        <OperationsDesk empty={data.fleet.total === 0 && data.rentals.total === 0} />
         {/* Page Header */}
         <div>
-          <h1 className="text-4xl font-extrabold tracking-tight text-[var(--on-surface)] font-headline">{branding.companyName} {t("title")}</h1>
-          <p className="text-[var(--muted-foreground)] mt-1 max-w-lg">{t("dashboard.tagline", { ns: "common", defaultValue: branding.tagline })}</p>
+          <h2 className="text-xl font-extrabold tracking-tight text-[var(--on-surface)] font-headline">{t("title")}</h2>
         </div>
 
         {/* Missing purchase-cost banner — unlocks ROI tracking once filled */}

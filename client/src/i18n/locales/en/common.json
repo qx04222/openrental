@@ -371,5 +371,24 @@
   "errors.notACreditNote": "Only a credit note can be absorbed into a balance.",
   "errors.creditNoteAlreadyAbsorbed": "This credit note has already been absorbed.",
   "errors.creditNoteEmpty": "This credit note has no amount to absorb.",
-  "sidebar.customerClassification": "Customer Classification"
+  "sidebar.customerClassification": "Customer Classification",
+  "workspace": {
+    "label": "OPERATIONS DESK",
+    "skip": "Skip to content",
+    "menu": "Open navigation",
+    "close": "Close navigation",
+    "navigation": "Main navigation",
+    "loading": "Loading current data…",
+    "failed": "Unable to load current data. No totals are shown until the connection is restored.",
+    "retry": "Try again",
+    "selectAll": "Select all rows on this page",
+    "selectRow": "Select row {{id}}",
+    "clear": "Clear search",
+    "page": "Page {{page}}",
+    "overview": "Workspace",
+    "uncertainWrite": "The connection was interrupted. Check the record before trying again; the change may already have been saved.",
+    "partialFailure": "Some data could not be loaded. Lists and totals may be incomplete. Restore the connection before acting on them."
+  },
+  "featureFlags.name.credit_orders": "Credit orders",
+  "featureFlags.desc.credit_orders": "Enable account-based orders with monthly invoicing. Configure customer credit limits before use."
 }

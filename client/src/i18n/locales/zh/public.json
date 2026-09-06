@@ -22,7 +22,6 @@
   "fieldAccess.resendIn": "{{seconds}} 秒后可重发",
   "fieldAccess.verify": "验证",
   "fieldAccess.verifying": "验证中...",
-
   "fieldDashboard.title": "现场工作台",
   "fieldDashboard.pendingSync": "条检查待同步",
   "fieldDashboard.startInspection": "开始检查",
@@ -36,7 +35,6 @@
   "fieldDashboard.noScheduleToday": "今天没有设备操作任务",
   "fieldDashboard.online": "在线",
   "fieldDashboard.offline": "离线",
-
   "fieldDeliveries.title": "我的配送",
   "fieldDeliveries.subtitle": "分配给您的调度订单",
   "fieldDeliveries.progressTitle": "设备进退场",
@@ -65,7 +63,6 @@
   "fieldDeliveries.deliveryMethod": "配送方式",
   "fieldDeliveries.distance": "距离",
   "fieldDeliveries.callCustomer": "呼叫",
-
   "rentalStatus.eyebrow": "订单追踪 · 实时状态",
   "rentalStatus.title": "查询订单状态",
   "rentalStatus.subtitle": "输入订单号和邮箱查看或修改您的租赁订单。",
@@ -113,5 +110,6 @@
   "rentalStatus.insuranceNone": "无保险",
   "rentalStatus.insuranceBasic": "基础保险",
   "rentalStatus.insuranceFull": "全险",
-  "rentalStatus.myAccount": "我的账户"
+  "rentalStatus.myAccount": "我的账户",
+  "fieldDashboard.syncNow": "立即同步"
 }

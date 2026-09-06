@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-const CACHE_NAME = "openrental-field-v2";
+const CACHE_NAME = "openrental-field-v3";
 const DB_NAME = "openrental-field-db";
 const DB_STORE = "pendingInspections";
 
@@ -23,7 +23,7 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.filter((k) => k !== CACHE_NAME).map((k) => caches.delete(k)))
+      Promise.all(keys.filter((k) => k.startsWith("openrental-field-") && k !== CACHE_NAME).map((k) => caches.delete(k)))
     )
   );
   self.clients.claim();
@@ -39,7 +39,7 @@ self.addEventListener("fetch", (event) => {
   }
 
   // Static assets: cache first, then network (and cache the response)
-  if (url.pathname.startsWith("/assets/") || url.pathname.startsWith("/field-icons/")) {
+  if (url.pathname === "/surface-init.js" || url.pathname.startsWith("/assets/") || url.pathname.startsWith("/field-icons/")) {
     event.respondWith(
       caches.match(event.request).then((cached) => {
         if (cached) return cached;
@@ -77,36 +77,55 @@ self.addEventListener("sync", (event) => {
   }
 });
 
-async function syncPendingInspections() {
-  const db = await openDB();
-  const tx = db.transaction(DB_STORE, "readonly");
-  const store = tx.objectStore(DB_STORE);
+// Online fallback also works in browsers without Background Sync support.
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "SYNC_INSPECTIONS") event.waitUntil(syncPendingInspections());
+});
 
-  return new Promise((resolve) => {
-    const request = store.getAll();
-    request.onsuccess = async () => {
-      const items = request.result;
-      for (const item of items) {
-        try {
-          // Match tRPC httpBatchLink format: POST /api/trpc/inspections.create?batch=1
-          // Body: { "0": { "json": { ... } } }
-          const res = await fetch("/api/trpc/inspections.create?batch=1", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ "0": { json: item } }),
-            credentials: "include",
-          });
-          if (res.ok) {
-            const deleteTx = db.transaction(DB_STORE, "readwrite");
-            deleteTx.objectStore(DB_STORE).delete(item.offlineId);
-          }
-        } catch {
-          // Will retry on next sync
-        }
+let syncInFlight;
+function syncPendingInspections() {
+  if (!syncInFlight) syncInFlight = flushInspections().finally(() => { syncInFlight = undefined; });
+  return syncInFlight;
+}
+
+async function flushInspections() {
+  const db = await openDB();
+  try {
+    const items = await new Promise((resolve, reject) => {
+      const request = db.transaction(DB_STORE, "readonly").objectStore(DB_STORE).getAll();
+      request.onsuccess = () => resolve(request.result);
+      request.onerror = () => reject(request.error);
+    });
+    let failed = false;
+    for (const item of items) {
+      try {
+        const res = await fetch("/api/trpc/inspections.create?batch=1", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ "0": { json: item } }),
+          credentials: "include",
+        });
+        if (!res.ok) throw new Error("Inspection not acknowledged");
+        const body = await res.json();
+        const saved = body?.[0]?.result?.data?.json;
+        if (!saved?.id || saved.offlineId !== item.offlineId) throw new Error("Inspection confirmation mismatch");
+        await new Promise((resolve, reject) => {
+          const tx = db.transaction(DB_STORE, "readwrite");
+          tx.objectStore(DB_STORE).delete(item.offlineId);
+          tx.oncomplete = resolve;
+          tx.onerror = () => reject(tx.error);
+          tx.onabort = () => reject(tx.error);
+        });
+      } catch {
+        failed = true; // Keep the full local record for a future authenticated retry.
       }
-      resolve();
-    };
-  });
+    }
+    const clients = await self.clients.matchAll({ type: "window" });
+    for (const client of clients) client.postMessage({ type: "INSPECTION_SYNC_FINISHED", failed });
+    if (failed) throw new Error("Some inspections remain pending");
+  } finally {
+    db.close();
+  }
 }
 
 function openDB() {

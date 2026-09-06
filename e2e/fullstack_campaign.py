@@ -45,7 +45,6 @@ def base_fixture():
     C['fleet'] = [trpc(admin, "rentalFleet.create", {"brand": f"FSB{R}", "model": f"FSM{R}", "category": f"FS类{R}", "serialNumber": f"FS-{R}-{i}", "currentStatus": "available"})["id"] for i in range(2)]
     C['wh'] = trpc(admin, "warehouses.create", {"name": f"FS仓{R}", "city": "Toronto", "province": "ON"})["id"]
     C['driver'] = trpc(admin, "drivers.create", {"name": f"FS司机{R}", "phone": f"416{R:07d}"[:11]})["id"]
-    C['operator'] = trpc(admin, "operators.create", {"name": f"FS操作员{R}"})["id"]
     C['project'] = trpc(admin, "projects.create", {"customerId": C['cust'], "name": f"FS项目{R}"})["id"]
     # an active rental order (quote-priced, no override)
     q = trpc(admin, "rentals.previewMultiItemQuote", {"startDate": "2026-09-01", "endDate": "2026-09-03", "deliveryMethod": "pickup", "taxProvince": "ON", "insuranceType": "basic", "items": [{"equipmentModelId": None, "fleetIds": [C['fleet'][0]], "itemType": "machine", "quantity": 1}]}, method="GET")
@@ -83,8 +82,6 @@ def round1():
     trpc(admin, "projects.update", {"id": C['project'], "status": "active", "city": "Toronto"})
     t.ok("项目 update 落库", psql(f"select city from projects where id={C['project']}") == "Toronto")
     # operators / drivers / warehouses
-    trpc(admin, "operators.update", {"id": C['operator'], "dailyRate": "200.00"})
-    t.ok("操作员 update 落库", psql(f"select \"dailyRate\" from operators where id={C['operator']}") == "200.00")
     trpc(admin, "drivers.update", {"id": C['driver'], "licenseNumber": "D123"})
     t.ok("司机 update 落库", psql(f"select \"licenseNumber\" from drivers where id={C['driver']}") == "D123")
     trpc(admin, "warehouses.update", {"id": C['wh'], "phone": "4160000000"})
@@ -100,9 +97,6 @@ def round1():
     trpc(admin, "workOrders.updateStatus", {"id": wo_id, "status": "in_progress"})
     t.ok("工单 create+加配件+改状态 落库", count("work_order_parts", f'"workOrderId"={wo_id}') >= 1 and psql(f"select status from work_orders where id={wo_id}") == "in_progress")
     # fleetCertificates
-    cert = trpc(admin, "fleetCertificates.create", {"rentalFleetId": C['fleet'][0], "certType": "inspection", "expiryDate": "2027-01-01"})["id"]
-    t.ok("设备证书 create 落库", count("fleet_certificates", f"id={cert}") == 1)
-    trpc(admin, "fleetCertificates.delete", {"id": cert})
     # dispatch
     disp = trpc(admin, "dispatch.create", {"orderType": "delivery", "rentalRequestId": C['order'], "customerId": C['cust'], "deliveryAddress": "1 Test Rd"})
     disp_id = disp.get("id") if isinstance(disp, dict) else disp

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import DashboardLayout from "@/components/DashboardLayout";
 import DataTable, { Column } from "@/components/DataTable";
@@ -53,11 +53,11 @@ export default function Customers() {
   );
   // Frontend filtering — the customer list is a small (<200 row) table, so
   // no need to round-trip these two filters through the server.
-  const data = rawData?.filter((c) => {
+  const data = useMemo(() => rawData?.filter((c) => {
     if (industryFilter && c.industry !== industryFilter && !(c.secondaryIndustries ?? []).includes(industryFilter)) return false;
     if (languageFilter && c.preferredLanguage !== languageFilter) return false;
     return true;
-  });
+  }), [rawData, industryFilter, languageFilter]);
   const createMut = trpc.customers.create.useMutation({
     onSuccess: () => { utils.customers.list.invalidate(); setOpen(false); toast.success(t("customers.customerCreated")); },
     onError: (err) => toast.error(serverErrorText(err)),
@@ -310,7 +310,7 @@ export default function Customers() {
       <div className="space-y-6">
         <div className="flex items-center justify-between flex-wrap gap-4">
           <h1 className="text-3xl font-extrabold tracking-tight text-[var(--on-surface)]">{t("customers.title")}</h1>
-          <div className="flex items-center gap-2">
+          <div className="flex max-w-full flex-wrap items-center gap-2">
             {segmentationEnabled && (
               <select
                 value={tierFilter}
@@ -348,9 +348,9 @@ export default function Customers() {
               ))}
             </select>
             <ExportToolbar
-              allData={filteredData.map((c) => ({ name: c.name, email: c.email || "", phone: c.phone || "", company: c.company || "", city: c.city || "", province: c.province || "" }))}
-              pageData={pageTableData.map((c) => ({ name: c.name, email: c.email || "", phone: c.phone || "", company: c.company || "", city: c.city || "", province: c.province || "" }))}
-              selectedData={Array.from(selectedKeys).flatMap(k => { const c = (data || []).find((_c, i) => i === k); return c ? [{ name: c.name, email: c.email || "", phone: c.phone || "", company: c.company || "", city: c.city || "", province: c.province || "" }] : []; })}
+              allData={filteredData.map((c) => ({ name: c.name, email: c.email || "", phone: c.phone || "", company: c.company || "", industry: c.industry || "", preferredLanguage: c.preferredLanguage || "", city: c.city || "", province: c.province || "" }))}
+              pageData={pageTableData.map((c) => ({ name: c.name, email: c.email || "", phone: c.phone || "", company: c.company || "", industry: c.industry || "", preferredLanguage: c.preferredLanguage || "", city: c.city || "", province: c.province || "" }))}
+              selectedData={Array.from(selectedKeys).flatMap(k => { const c = (data || []).find(c => c.id === k); return c ? [{ name: c.name, email: c.email || "", phone: c.phone || "", company: c.company || "", industry: c.industry || "", preferredLanguage: c.preferredLanguage || "", city: c.city || "", province: c.province || "" }] : []; })}
               columns={exportColumns}
               fileName="customers"
               title={t("customers.title")}
@@ -366,6 +366,7 @@ export default function Customers() {
           emptyMessage={t("customers.noCustomers")}
           searchPlaceholder={t("customers.searchCustomers")}
           selectable
+          rowKey={(row) => row.id}
           selectedKeys={selectedKeys}
           onSelectionChange={setSelectedKeys}
           onDataReady={handleDataReady}

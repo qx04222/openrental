@@ -69,9 +69,9 @@ export async function setFlag(key: string, enabled: boolean) {
   if (!db) throw new Error("Database not available");
 
   await db
-    .update(schema.featureFlags)
-    .set({ enabled, updatedAt: new Date() })
-    .where(eq(schema.featureFlags.key, key));
+    .insert(schema.featureFlags)
+    .values({ key, enabled })
+    .onConflictDoUpdate({ target: schema.featureFlags.key, set: { enabled, updatedAt: new Date() } });
 
   cache.delete(key);
   allFlagsCache = null;

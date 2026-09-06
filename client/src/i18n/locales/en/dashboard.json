@@ -268,5 +268,34 @@
   "reports.financing.tier.tier2": "Tier2 light",
   "reports.financing.tier.normal": "Normal",
   "reports.financing.idleNote": "Idle tiers recomputed live over the window. Maintenance units show a badge — decide per-unit whether they are removable (broken vs no-demand). System counts 30 in-fleet units; the desktop sheet counts 31 (incl. 1 maintenance unit not yet in the system).",
-  "reports.filter.industry": "Customer industry"
+  "reports.filter.industry": "Customer industry",
+  "desk": {
+    "eyebrow": "YOUR YARD, AT A GLANCE",
+    "title": "Make room for today.",
+    "description": "From the first dispatch to the final return. See what needs attention, then keep the yard moving.",
+    "queue": "Needs your attention",
+    "allClear": "You’re up to date",
+    "allClearDetail": "No outstanding items in the monitored work queues.",
+    "overdue": "{{count}} overdue",
+    "age": "{{count}} days waiting",
+    "open": "Open workspace",
+    "refresh": "Refresh",
+    "total": "{{count}} items to resolve",
+    "kinds": {
+      "work_order": "Maintenance",
+      "draft_invoice": "Unissued invoices",
+      "damage_claim": "Damage claims",
+      "dispatch_order": "Dispatch",
+      "extension_request": "Extensions",
+      "held_deposit": "Held deposits",
+      "unbilled_credit_charges": "Unbilled charges",
+      "overdue_invoice": "Overdue invoices"
+    },
+    "setupTitle": "Your yard starts here",
+    "setupDescription": "Set up your company, add the first machine and customer, then create a rental.",
+    "setupCompany": "Company & team",
+    "setupFleet": "Add equipment",
+    "setupCustomers": "Add customers",
+    "setupOrder": "Create a rental"
+  }
 }

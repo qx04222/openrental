@@ -371,5 +371,24 @@
   "errors.notACreditNote": "只有贷记单可以转入余额。",
   "errors.creditNoteAlreadyAbsorbed": "该贷记单已转入余额。",
   "errors.creditNoteEmpty": "该贷记单没有可转金额。",
-  "sidebar.customerClassification": "客户分类"
+  "sidebar.customerClassification": "客户分类",
+  "workspace": {
+    "label": "租赁运营工作台",
+    "skip": "跳到主要内容",
+    "menu": "打开导航",
+    "close": "关闭导航",
+    "navigation": "主要导航",
+    "loading": "正在加载最新数据…",
+    "failed": "无法加载最新数据。连接恢复前不显示统计，避免将失败误认为零。",
+    "retry": "重新加载",
+    "selectAll": "选择本页全部记录",
+    "selectRow": "选择记录 {{id}}",
+    "clear": "清除搜索",
+    "page": "第 {{page}} 页",
+    "overview": "工作台",
+    "uncertainWrite": "连接中断。此操作可能已保存，请先检查记录，再决定是否重试。",
+    "partialFailure": "部分数据加载失败，列表和统计可能不完整。请恢复连接后再根据这些数据操作。"
+  },
+  "featureFlags.name.credit_orders": "挂账订单",
+  "featureFlags.desc.credit_orders": "启用挂账及月结订单，使用前请设置客户信用额度。"
 }

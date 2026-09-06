@@ -11,7 +11,7 @@ set -euo pipefail
 cd "$(dirname "$0")/.."
 source e2e/migrations.sh
 
-DB_NAME="${OPENRENTAL_TEST_DB:-mr_bin_e2e}"
+DB_NAME="${OPENRENTAL_TEST_DB:-openrental_e2e}"
 DB_URL="${DATABASE_URL_TEST:-postgresql://$(whoami)@localhost:5432/${DB_NAME}}"
 PORT="${OPENRENTAL_PORT:-3100}"
 LOG="$(mktemp -t openrental_e2e_server.XXXXXX)"
@@ -19,7 +19,7 @@ LOG="$(mktemp -t openrental_e2e_server.XXXXXX)"
 echo "==> Preparing database ${DB_NAME}"
 # Recreate only when using the local default; in CI the service DB is already empty.
 if [ -z "${DATABASE_URL_TEST:-}" ]; then
-  dropdb --if-exists "${DB_NAME}" >/dev/null 2>&1 || true
+  # Do not destroy an existing DB. A unique scratch name is required.
   createdb "${DB_NAME}"
 fi
 psql "${DB_URL}" -v ON_ERROR_STOP=1 -q -f sql/000_baseline.sql
@@ -30,7 +30,7 @@ DATABASE_URL="${DB_URL}" NODE_ENV=development npx tsx server/db/seed.ts
 
 echo "==> Starting server on :${PORT}"
 DATABASE_URL="${DB_URL}" NODE_ENV=development PORT="${PORT}" \
-  RENTAL_CREATE_RATE_MAX=1000 TRPC_RATE_MAX=100000 npm run dev > "${LOG}" 2>&1 &
+  RENTAL_CREATE_RATE_MAX=1000 TRPC_RATE_MAX=100000 node --import tsx server/_core/index.ts > "${LOG}" 2>&1 &
 SERVER_PID=$!
 trap 'kill ${SERVER_PID} 2>/dev/null || true' EXIT
 READY_LINE="running on http://localhost:${PORT}/"

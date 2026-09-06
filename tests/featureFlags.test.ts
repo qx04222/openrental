@@ -14,9 +14,9 @@ const { mockDb, selectResultRef } = vi.hoisted(() => {
         orderBy: () => Promise.resolve(selectResultRef.value),
       }),
     })),
-    update: vi.fn(() => ({
-      set: () => ({
-        where: () => Promise.resolve(),
+    insert: vi.fn(() => ({
+      values: ({ enabled }: { enabled: boolean }) => ({
+        onConflictDoUpdate: () => { selectResultRef.value = [{ enabled }]; return Promise.resolve(); },
       }),
     })),
   };
@@ -70,6 +70,12 @@ describe("featureFlags", () => {
     selectResultRef.value = [{ enabled: true }];
     expect(await isFeatureEnabled("toggle_me")).toBe(true);
     expect(mockDb.select).toHaveBeenCalledTimes(2);
+  });
+
+  it("enables a flag on an empty installation", async () => {
+    expect(await isFeatureEnabled("new_flag")).toBe(false);
+    await setFlag("new_flag", true);
+    expect(await isFeatureEnabled("new_flag")).toBe(true);
   });
 
   it("listFlags returns all rows from DB", async () => {

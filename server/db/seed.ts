@@ -1,4 +1,5 @@
 import "dotenv/config";
+import { DEFAULT_FEATURE_FLAGS } from "../../shared/defaultFeatureFlags";
 import { getDb } from "./core";
 import * as schema from "../../drizzle/schema";
 import bcrypt from "bcrypt";
@@ -6,6 +7,7 @@ import bcrypt from "bcrypt";
 /* eslint-disable no-console -- seed/CLI script */
 
 async function seed() {
+  if (process.env.NODE_ENV === "production") throw new Error("Demo seed is disabled in production; use bootstrap");
   const db = await getDb();
   if (!db) {
     console.error("DATABASE_URL not configured");
@@ -73,6 +75,7 @@ async function seed() {
     await db.insert(schema.siteSettings).values(s).onConflictDoNothing();
   }
 
+  await db.insert(schema.featureFlags).values(DEFAULT_FEATURE_FLAGS).onConflictDoNothing();
   console.log("Seed complete!");
   process.exit(0);
 }

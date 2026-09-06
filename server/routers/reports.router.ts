@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
 import { router, protectedProcedure, moduleGuard } from "../_core/trpc";
 import { getDb, sql } from "../db";
@@ -1176,7 +1177,7 @@ export const reportsRouter = router({
   internalWorkQueue: protectedProcedure.use(moduleGuard('reports', 'read'))
     .query(async () => {
       const db = await getDb();
-      if (!db) return { buckets: [], total: 0, overdueTotal: 0 };
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
       return getInternalWorkQueue(db);
     }),
 

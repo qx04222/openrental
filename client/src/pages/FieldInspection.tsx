@@ -60,6 +60,7 @@ export default function FieldInspection() {
   const [locationAddress, setLocationAddress] = useState("");
   const [coords, setCoords] = useState<{ lat: string; lng: string } | null>(null);
 
+  const offlineIdRef = useRef(nanoid());
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [currentPhotoField, setCurrentPhotoField] = useState("");
   const [processingPhotos, setProcessingPhotos] = useState<Record<string, boolean>>({});
@@ -187,15 +188,19 @@ export default function FieldInspection() {
       customerSignature: signature || undefined,
       customerSignedAt: signature ? new Date().toISOString() : undefined,
       notes: notes || undefined,
-      offlineId: nanoid(),
+      offlineId: offlineIdRef.current,
     };
 
     if (navigator.onLine) {
       createInspection.mutate(data);
     } else {
-      await savePendingInspection(data);
-      toast.success(t("field.savedOffline"));
-      setLocation("/field-dashboard");
+      try {
+        await savePendingInspection(data);
+        toast.success(t("field.savedOffline"));
+        setLocation("/field-dashboard");
+      } catch {
+        toast.error(t("field.offlineSaveFailed"));
+      }
     }
   };
 

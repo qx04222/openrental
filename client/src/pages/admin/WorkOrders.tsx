@@ -872,12 +872,12 @@ export default function WorkOrders() {
         {/* Header */}
         <div className="flex items-center justify-between flex-wrap gap-4">
           <h1 className="text-3xl font-extrabold tracking-tight text-[var(--on-surface)]">{t("workOrders.pageTitle")}</h1>
-          <div className="flex items-center gap-2">
+          <div className="flex max-w-full flex-wrap items-center gap-2">
             <ExportToolbar
               allData={filteredData.map(mapWoForExport)}
               pageData={pageTableData.map(mapWoForExport)}
               selectedData={Array.from(selectedKeys).map(k => {
-                const r = visibleWorkOrders.find((_, i) => i === k);
+                const r = visibleWorkOrders.find(row => row.work_orders.id === k);
                 return r ? mapWoForExport(r) : null;
               }).filter(Boolean) as Record<string, unknown>[]}
               columns={exportColumns}
@@ -920,6 +920,7 @@ export default function WorkOrders() {
           emptyMessage={t("workOrders.noWorkOrdersFound")}
           searchPlaceholder={t("workOrders.searchPlaceholder")}
           selectable
+          rowKey={(row) => row.work_orders.id}
           selectedKeys={selectedKeys}
           onSelectionChange={setSelectedKeys}
           onDataReady={handleDataReady}

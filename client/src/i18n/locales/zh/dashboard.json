@@ -268,5 +268,34 @@
   "reports.financing.tier.tier2": "Tier2几乎闲",
   "reports.financing.tier.normal": "正常",
   "reports.financing.idleNote": "闲置分级按窗口实时重算；维修中设备带标记——是否可剔除请逐台判断（坏了≠无需求）。系统在册30台；桌面表31台（含1台维修中、系统未建档）。",
-  "reports.filter.industry": "客户行业"
+  "reports.filter.industry": "客户行业",
+  "desk": {
+    "eyebrow": "掌握租赁场站的每一天",
+    "title": "今天的工作，一目了然。",
+    "description": "从出库到归还，优先处理需要关注的事项，让设备、订单与账款持续流转。",
+    "queue": "需要处理",
+    "allClear": "待办已清空",
+    "allClearDetail": "当前监控的工作队列没有未完成事项。",
+    "overdue": "{{count}} 项超期",
+    "age": "已等待 {{count}} 天",
+    "open": "进入业务",
+    "refresh": "刷新",
+    "total": "{{count}} 项待处理",
+    "kinds": {
+      "work_order": "维修工单",
+      "draft_invoice": "未开具发票",
+      "damage_claim": "损坏索赔",
+      "dispatch_order": "配送调度",
+      "extension_request": "续租申请",
+      "held_deposit": "待结算押金",
+      "unbilled_credit_charges": "待出账费用",
+      "overdue_invoice": "逾期发票"
+    },
+    "setupTitle": "从这里建立你的租赁场站",
+    "setupDescription": "先设置公司，录入设备与客户，再建立第一张租赁订单。",
+    "setupCompany": "公司与团队",
+    "setupFleet": "录入设备",
+    "setupCustomers": "录入客户",
+    "setupOrder": "创建租赁订单"
+  }
 }

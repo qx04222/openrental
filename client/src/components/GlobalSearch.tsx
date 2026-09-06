@@ -1,3 +1,5 @@
+import * as Dialog from "@radix-ui/react-dialog";
+import QueryState from "./QueryState";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
 import { trpc } from "@/lib/trpc";
@@ -15,13 +17,17 @@ export default function GlobalSearch() {
   const [, setLocation] = useLocation();
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [debouncedQuery, setDebouncedQuery] = useState("");
+  useEffect(() => { const timer = setTimeout(() => setDebouncedQuery(query.trim()), 200); return () => clearTimeout(timer); }, [query]);
   const inputRef = useRef<HTMLInputElement>(null);
   const searchEnabled = useFeatureFlag("global_search");
 
-  const { data, isFetching } = trpc.search.global.useQuery(
-    { query: query.trim(), limit: 5 },
-    { enabled: searchEnabled && open && query.trim().length >= 1 },
+  const searchQuery = trpc.search.global.useQuery(
+    { query: debouncedQuery, limit: 5 },
+    { enabled: searchEnabled && open && debouncedQuery.length >= 1 },
   );
+
+  const { data, isFetching, isError } = searchQuery;
 
   // Cmd+K / Ctrl+K to open — no-op when feature flag is off
   useEffect(() => {
@@ -64,23 +70,25 @@ export default function GlobalSearch() {
   if (!searchEnabled || !open) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] bg-black/40" onClick={() => setOpen(false)}>
-      <div
-        className="max-w-xl mx-auto mt-[15vh] bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
-      >
+    <Dialog.Root open={open} onOpenChange={setOpen}>
+      <Dialog.Portal>
+      <Dialog.Overlay className="fixed inset-0 z-[60] bg-black/40" />
+      <Dialog.Content className="fixed z-[61] top-[15vh] left-1/2 -translate-x-1/2 w-[calc(100%-2rem)] max-w-xl bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden">
+        <Dialog.Title className="sr-only">{t("header.search")}</Dialog.Title>
+        <Dialog.Description className="sr-only">{t("globalSearch.placeholder")}</Dialog.Description>
         {/* Search input */}
         <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200">
           <Search size={18} className="text-slate-400" />
           <input
             ref={inputRef}
+            aria-label={t("globalSearch.placeholder")}
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder={t("globalSearch.placeholder")}
             className="flex-1 text-sm text-slate-900 bg-transparent outline-none placeholder-gray-400"
           />
           {query && (
-            <button onClick={() => setQuery("")} className="text-slate-400 hover:text-slate-600">
+            <button aria-label={t("workspace.clear")} onClick={() => setQuery("")} className="text-slate-400 hover:text-slate-600">
               <X size={14} />
             </button>
           )}
@@ -95,13 +103,14 @@ export default function GlobalSearch() {
             </div>
           )}
 
-          {noResults && !isFetching && (
+          {isError && <QueryState loading={false} onRetry={() => void searchQuery.refetch()} />}
+          {noResults && !isFetching && !isError && (
             <div className="px-4 py-6 text-center text-sm text-slate-400">
               {t("globalSearch.noResults")}
             </div>
           )}
 
-          {hasResults && (
+          {hasResults && !isError && (
             <div className="py-2">
               {/* Customers */}
               {data.customers.length > 0 && (
@@ -264,7 +273,8 @@ export default function GlobalSearch() {
             </div>
           )}
         </div>
-      </div>
-    </div>
+      </Dialog.Content>
+      </Dialog.Portal>
+    </Dialog.Root>
   );
 }

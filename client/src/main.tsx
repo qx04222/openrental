@@ -1,12 +1,14 @@
+import { mutationDefaults } from "./lib/networkPolicy";
 import { trpc } from "@/lib/trpc";
 import { UNAUTHED_ERR_MSG } from "../../shared/const";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { MutationCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { httpBatchLink, TRPCClientError } from "@trpc/client";
 import { createRoot } from "react-dom/client";
 import superjson from "superjson";
 import App from "./App";
 import { registerServiceWorker, setupInstallPrompt, applyManifestForRoute } from "./lib/pwa";
-import "./i18n";
+import i18n from "./i18n";
+import { toast } from "sonner";
 import "./index.css";
 
 const shouldRetry = (failureCount: number, error: unknown): boolean => {
@@ -23,6 +25,11 @@ const shouldRetry = (failureCount: number, error: unknown): boolean => {
 const getRetryDelay = (attemptIndex: number): number => Math.min(1000 * 2 ** attemptIndex, 10000);
 
 const queryClient = new QueryClient({
+  mutationCache: new MutationCache({ onError: (error) => {
+    if (!(error instanceof TRPCClientError) || !error.data?.code) {
+      toast.error(i18n.t("workspace.uncertainWrite"), { duration: 12000 });
+    }
+  } }),
   defaultOptions: {
     queries: {
       staleTime: 5 * 60 * 1000,
@@ -34,13 +41,8 @@ const queryClient = new QueryClient({
       networkMode: "offlineFirst",
     },
     mutations: {
-      retry: (failureCount, error) => {
-        if (failureCount >= 2) return false;
-        if (error instanceof TRPCClientError) return false;
-        return true;
-      },
+      ...mutationDefaults,
       retryDelay: getRetryDelay,
-      networkMode: "offlineFirst",
     },
   },
 });

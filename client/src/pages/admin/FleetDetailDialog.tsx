@@ -232,7 +232,7 @@ export default function FleetDetailDialog({ fleetId, fleetLabel, onClose }: Flee
                             </span>
                             {insp.damageSeverity && insp.damageSeverity !== "none" && (
                               <span className="px-1.5 py-0.5 bg-red-50 text-red-600 rounded text-xs">
-                                {t(`damage.${insp.damageSeverity}` as keyof typeof import("@/i18n/locales/en/common.json"), { ns: "common" })}
+                                {t(`damage.${insp.damageSeverity}` as `damage.${"minor" | "moderate" | "severe"}`, { ns: "common" })}
                               </span>
                             )}
                           </div>

@@ -7,3 +7,7 @@ npm-debug.log*
 .DS_Store
 e2e/screenshots
 coverage
+.env.*
+.railway
+__pycache__
+browser-evidence

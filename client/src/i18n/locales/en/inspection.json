@@ -63,7 +63,6 @@
   "odometerLabel": "Odometer:",
   "createdLabel": "Created:",
   "rentalLabel": "Rental:",
-
   "field.title": "Equipment Inspection",
   "field.type": "Type",
   "field.equipment": "Equipment",
@@ -129,7 +128,6 @@
   "field.fromFleetList": "All Equipment",
   "field.selectRentalOrder": "Select Rental Order",
   "field.noActiveRentals": "No active rental orders",
-
   "staff.verifying": "Verifying inspection token...",
   "staff.invalidToken": "Invalid Token",
   "staff.invalidMessage": "This inspection link is invalid, expired, or has already been used.",
@@ -168,7 +166,6 @@
   "staff.locationError": "Could not get location",
   "staff.submitSuccess": "Inspection submitted successfully!",
   "staff.submitError": "Failed to submit inspection:",
-
   "fleetHistory.title": "Equipment Inspection History",
   "fleetHistory.subtitle": "Complete inspection record",
   "fleetHistory.viewFull": "Full History",
@@ -184,7 +181,6 @@
   "fleetHistory.damageNotes": "Damage Notes",
   "fleetHistory.allInspections": "All Inspections",
   "fleetHistory.noInspections": "No inspections for this equipment",
-
   "tokenDeleted": "Token deleted",
   "tokensDeleted": "{{count}} token(s) deleted",
   "deleteToken": "Delete token",
@@ -195,7 +191,6 @@
   "downloadPDF": "Download PDF",
   "inspectionsDeleted": "{{count}} inspection(s) deleted",
   "deleteInspectionsConfirm": "Are you sure you want to delete {{count}} inspection(s)? This action cannot be undone.",
-
   "field.fuelChargeCalc": "Fuel Charge Calculation",
   "field.fuelDeficit": "Fuel deficit",
   "field.tankCapacity": "Tank capacity",
@@ -206,7 +201,6 @@
   "field.fuelChargeLabel": "Fuel Charge",
   "field.damageClaimWillCreate": "A damage claim will be auto-created upon submission",
   "field.damageClaimLabel": "Damage Claim",
-
   "fuelCharge": "Fuel Charge",
   "fuelChargeAutoInvoice": "A fuel surcharge invoice was auto-generated for this inspection",
   "damageClaimCreated": "Damage Claim Created",
@@ -214,5 +208,6 @@
   "editInspection": "Edit",
   "newAdminInspection": "Admin Upload",
   "openEditor": "Open Editor",
-  "adminInspectionPickerNeedsId": "Provide at least a rental ID or fleet ID"
+  "adminInspectionPickerNeedsId": "Provide at least a rental ID or fleet ID",
+  "field.offlineSaveFailed": "Could not save on this device. Keep this form open and try again."
 }

@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { router, protectedProcedure, moduleGuard } from "../_core/trpc";
 import { getDb, sql, isNull, isNotNull, desc, lte, and, gte, inArray, eq } from "../db";
 import * as schema from "../../drizzle/schema";
@@ -14,14 +15,7 @@ function torontoTodayRange(): { startUtc: Date; endUtc: Date; dateStr: string } 
 export const dashboardRouter = router({
   todaySchedule: protectedProcedure.use(moduleGuard('reports', 'read')).query(async () => {
     const db = await getDb();
-    if (!db) {
-      return {
-        deliveriesDue: [],
-        returnsDue: [],
-        startingToday: [],
-        endingToday: [],
-      };
-    }
+    if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
 
     const { startUtc, endUtc } = torontoTodayRange();
 
@@ -114,7 +108,7 @@ export const dashboardRouter = router({
 
   stats: protectedProcedure.use(moduleGuard('reports', 'read')).query(async () => {
     const db = await getDb();
-    if (!db) return null;
+    if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Database unavailable" });
     const fleetAvailable = fleetOperationalAvailabilityWhere();
     const rentalBucket = dashboardRentalBucketSql(
       sql`${schema.rentalRequests.id}`,

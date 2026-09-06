@@ -1,3 +1,5 @@
+import QueryState from "@/components/QueryState";
+import OperationsDesk from "@/components/OperationsDesk";
 import { useTranslation } from "react-i18next";
 import { Link } from "wouter";
 import DashboardLayout from "@/components/DashboardLayout";
@@ -23,7 +25,6 @@ import {
   Activity,
 } from "lucide-react";
 import { useFormatCalendarDate } from "@/lib/dateUtils";
-import { useBranding } from "@/config/branding";
 import { useFeatureFlag } from "@/hooks/useFeatureFlag";
 import { formatCurrency } from "@/lib/pricing";
 import { serverErrorText } from "@/lib/serverError";
@@ -37,13 +38,13 @@ import { serverErrorText } from "@/lib/serverError";
  */
 export default function MobileAdminHome() {
   const { t } = useTranslation(["dashboard", "rental", "dispatch", "common"]);
-  const branding = useBranding();
   const fmtDate = useFormatCalendarDate();
   const utils = trpc.useUtils();
 
   const { data: pendingRentals } = trpc.rentals.list.useQuery({ status: "pending" });
   const { data: todayData } = trpc.dashboard.todaySchedule.useQuery();
-  const { data: stats } = trpc.dashboard.stats.useQuery();
+  const statsQuery = trpc.dashboard.stats.useQuery(undefined, { refetchInterval: 60_000 });
+  const { data: stats } = statsQuery;
   const showTodayPanel = useFeatureFlag("today_dashboard");
   const dispatchWorkflowEnabled = useFeatureFlag("dispatch_workflow");
   const rollingOperationsEnabled = useFeatureFlag("rolling_renewal_operations");
@@ -167,14 +168,17 @@ export default function MobileAdminHome() {
     },
   ];
 
+  if (statsQuery.isPending || statsQuery.isError || !stats) return <DashboardLayout><QueryState loading={statsQuery.isPending} onRetry={() => void statsQuery.refetch()} /></DashboardLayout>;
+
   return (
     <DashboardLayout>
+      <OperationsDesk empty={stats.fleet.total === 0 && stats.rentals.total === 0} />
       <div className="space-y-5 pb-6">
         {/* Page title */}
         <div>
-          <h1 className="text-2xl font-extrabold tracking-tight text-[var(--on-surface)] font-headline">
-            {branding.companyName} {t("title")}
-          </h1>
+          <h2 className="text-xl font-extrabold tracking-tight text-[var(--on-surface)] font-headline">
+            {t("title")}
+          </h2>
         </div>
 
         {/* Explicit financial meanings */}

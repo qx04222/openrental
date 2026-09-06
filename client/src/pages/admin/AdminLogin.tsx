@@ -58,7 +58,7 @@ export default function AdminLogin() {
         {/* Login Form Card */}
         <form onSubmit={handleLogin} className="bg-[var(--surface-container-lowest)] rounded-2xl shadow-sm p-8 space-y-5">
           {error && (
-            <div className="bg-[var(--error-container)] rounded-xl p-3.5 text-[var(--error)] text-sm font-medium">
+            <div role="alert" className="bg-[var(--error-container)] rounded-xl p-3.5 text-[var(--error)] text-sm font-medium">
               {error}
             </div>
           )}
@@ -69,6 +69,7 @@ export default function AdminLogin() {
               <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 id="login-username"
+                autoComplete="username"
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
@@ -85,6 +86,7 @@ export default function AdminLogin() {
               <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
               <input
                 id="login-password"
+                autoComplete="current-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

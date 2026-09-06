@@ -3,7 +3,7 @@ import { useBranding } from "@/config/branding";
 import { trpc } from "@/lib/trpc";
 import { ClipboardCheck, Truck, LogOut, Wifi, WifiOff, Calendar } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
-import { getPendingInspections } from "@/lib/pwa";
+import { getPendingInspections, requestInspectionSync } from "@/lib/pwa";
 import { useTranslation } from "react-i18next";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { assetProgressTab } from "@/lib/assetProgressPresentation";
@@ -48,7 +48,21 @@ export default function FieldDashboard() {
   }, []);
 
   useEffect(() => {
-    getPendingInspections().then((items) => setPendingCount(items.length)).catch(() => {});
+    const refresh = () => getPendingInspections().then(items => setPendingCount(items.length)).catch(() => {});
+    const sync = () => { void requestInspectionSync().catch(() => {}); };
+    const onMessage = (event: MessageEvent) => {
+      if (event.data?.type === "INSPECTION_SYNC_FINISHED") void refresh();
+    };
+    void refresh();
+    sync();
+    window.addEventListener("online", sync);
+    navigator.serviceWorker?.addEventListener("message", onMessage);
+    const timer = window.setInterval(() => { void refresh(); sync(); }, 30_000);
+    return () => {
+      window.removeEventListener("online", sync);
+      navigator.serviceWorker?.removeEventListener("message", onMessage);
+      window.clearInterval(timer);
+    };
   }, []);
 
   return (
@@ -74,8 +88,9 @@ export default function FieldDashboard() {
 
         {/* Pending Sync Banner */}
         {pendingCount > 0 && (
-          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mb-6 text-yellow-400 text-sm">
+          <div className="bg-yellow-500/10 border border-yellow-500/30 rounded-lg p-3 mb-6 text-amber-800 text-sm">
             {pendingCount} {t("fieldDashboard.pendingSync")}
+            {isOnline && <button className="ml-2 font-semibold underline" onClick={() => void requestInspectionSync().catch(() => {})}>{t("fieldDashboard.syncNow")}</button>}
           </div>
         )}
 

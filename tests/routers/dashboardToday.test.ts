@@ -158,16 +158,10 @@ describe("dashboard.todaySchedule", () => {
     queryQueue.value = [];
   });
 
-  it("returns empty arrays when DB is unavailable", async () => {
+  it("reports database failure instead of a false empty schedule", async () => {
     mockGetDb.mockResolvedValueOnce(null);
     const caller = createCaller(makeCtx());
-    const result = await caller.todaySchedule();
-    expect(result).toEqual({
-      deliveriesDue: [],
-      returnsDue: [],
-      startingToday: [],
-      endingToday: [],
-    });
+    await expect(caller.todaySchedule()).rejects.toMatchObject({ code: "INTERNAL_SERVER_ERROR" });
   });
 
   it("returns deliveriesDue with expected shape", async () => {

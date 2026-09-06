@@ -1,5 +1,6 @@
 import "dotenv/config";
 import express from "express";
+import { readinessHandler, livenessHandler } from "./readiness";
 import { createServer } from "http";
 import net from "net";
 import cookieParser from "cookie-parser";
@@ -178,9 +179,8 @@ async function startServer() {
   );
 
   // Health check
-  app.get("/health", (_req, res) => {
-    res.json({ status: "ok", timestamp: new Date().toISOString() });
-  });
+  app.get("/health", livenessHandler);
+  app.get("/health/ready", readinessHandler);
 
   // Error logging
   app.use(errorLogger());
@@ -193,7 +193,7 @@ async function startServer() {
   }
 
   const preferredPort = parseInt(process.env.PORT || "3000");
-  const port = await findAvailablePort(preferredPort);
+  const port = process.env.NODE_ENV === "production" ? preferredPort : await findAvailablePort(preferredPort);
   if (port !== preferredPort) {
     logger.warn(`Port ${preferredPort} busy, using ${port}`);
   }
@@ -201,6 +201,25 @@ async function startServer() {
   server.listen(port, () => {
     logger.info(`OpenRental server running on http://localhost:${port}/`);
   });
+
+  // Stop accepting work before closing the database; the platform can route away.
+  let stopping = false;
+  const shutdown = async () => {
+    if (stopping) return;
+    stopping = true;
+    logger.info("server.shutdown");
+    const deadline = setTimeout(() => process.exit(1), 25_000).unref();
+    const cron = await import("node-cron");
+    for (const task of cron.default.getTasks().values()) task.stop();
+    server.close(async () => {
+      const { closePool } = await import("../db");
+      await closePool();
+      clearTimeout(deadline);
+      process.exit(0);
+    });
+  };
+  process.once("SIGTERM", shutdown);
+  process.once("SIGINT", shutdown);
 
   // Seed default contract template if none exist
   try {
@@ -266,7 +285,7 @@ async function startServer() {
           error: err instanceof Error ? err.message : String(err),
         });
       }
-    }, { timezone: cronTimezone });
+    }, { timezone: cronTimezone, noOverlap: true });
     logger.info(`[Cron] Rental lifecycle effect retry scheduled every 5 minutes (${cronTimezone})`);
 
     // Late fee estimation — daily at 03:30 the configured timezone
@@ -279,7 +298,7 @@ async function startServer() {
           error: err instanceof Error ? err.message : String(err),
         });
       }
-    }, { timezone: cronTimezone });
+    }, { timezone: cronTimezone, noOverlap: true });
     logger.info(`[Cron] Late fee estimation scheduled for 3:30 AM daily (${cronTimezone})`);
 
     // Overdue status flip — daily at 04:00 the configured timezone
@@ -292,7 +311,7 @@ async function startServer() {
           error: err instanceof Error ? err.message : String(err),
         });
       }
-    }, { timezone: cronTimezone });
+    }, { timezone: cronTimezone, noOverlap: true });
     logger.info(`[Cron] Overdue status flip scheduled for 4:00 AM daily (${cronTimezone})`);
 
     // Rolling-rental settlement — daily at 04:15 Toronto, after overdue state
@@ -307,7 +326,7 @@ async function startServer() {
           error: err instanceof Error ? err.message : String(err),
         });
       }
-    }, { timezone: cronTimezone });
+    }, { timezone: cronTimezone, noOverlap: true });
     logger.info(`[Cron] Rolling rental settlement scheduled for 4:15 AM daily (${cronTimezone})`);
 
     // Price version promotion — daily at 00:05 the configured timezone.
@@ -322,7 +341,7 @@ async function startServer() {
           error: err instanceof Error ? err.message : String(err),
         });
       }
-    }, { timezone: cronTimezone });
+    }, { timezone: cronTimezone, noOverlap: true });
     logger.info(`[Cron] Price version promotion scheduled for 00:05 daily (${cronTimezone})`);
 
     // Rental reminders — daily at 09:00 Toronto.
@@ -336,7 +355,7 @@ async function startServer() {
           error: err instanceof Error ? err.message : String(err),
         });
       }
-    }, { timezone: cronTimezone });
+    }, { timezone: cronTimezone, noOverlap: true });
     logger.info(`[Cron] Rental reminders scheduled for 9:00 AM daily (${cronTimezone})`);
 
     // Quotation expiry — daily at 04:00 local. Marks draft/sent quotes past
@@ -348,7 +367,7 @@ async function startServer() {
       } catch (err) {
         logger.warn("[Cron] Quotation expiry failed", { error: err instanceof Error ? err.message : String(err) });
       }
-    }, { timezone: cronTimezone });
+    }, { timezone: cronTimezone, noOverlap: true });
     logger.info(`[Cron] Quotation expiry scheduled for 4:00 AM daily (${cronTimezone})`);
 
   } catch (error) {

@@ -113,7 +113,14 @@ export async function savePendingInspection(data: PendingInspection): Promise<vo
   const tx = db.transaction("pendingInspections", "readwrite");
   tx.objectStore("pendingInspections").put(data);
   return new Promise((resolve, reject) => {
-    tx.oncomplete = () => resolve();
+    tx.oncomplete = () => {
+      db.close(); resolve();
+      // Saving succeeds independently of background-sync availability.
+      if ("serviceWorker" in navigator) void navigator.serviceWorker.ready.then(registration => {
+        const withSync = registration as ServiceWorkerRegistration & { sync?: { register(tag: string): Promise<void> } };
+        return withSync.sync?.register("sync-inspections");
+      }).catch(() => {});
+    };
     tx.onerror = () => reject(tx.error);
   });
 }
@@ -124,7 +131,7 @@ export async function getPendingInspections(): Promise<PendingInspection[]> {
   const store = tx.objectStore("pendingInspections");
   return new Promise((resolve, reject) => {
     const request = store.getAll();
-    request.onsuccess = () => resolve(request.result as PendingInspection[]);
+    request.onsuccess = () => { db.close(); resolve(request.result as PendingInspection[]); };
     request.onerror = () => reject(request.error);
   });
 }
@@ -134,7 +141,15 @@ export async function removePendingInspection(offlineId: string): Promise<void> 
   const tx = db.transaction("pendingInspections", "readwrite");
   tx.objectStore("pendingInspections").delete(offlineId);
   return new Promise((resolve, reject) => {
-    tx.oncomplete = () => resolve();
+    tx.oncomplete = () => { db.close(); resolve(); };
     tx.onerror = () => reject(tx.error);
   });
+}
+
+/** Request the service worker to flush the durable outbox. Concurrent requests
+ * share one worker operation; authenticated API acknowledgement controls removal. */
+export async function requestInspectionSync(): Promise<void> {
+  if (!navigator.onLine || !("serviceWorker" in navigator)) return;
+  const registration = await navigator.serviceWorker.ready;
+  registration.active?.postMessage({ type: "SYNC_INSPECTIONS" });
 }

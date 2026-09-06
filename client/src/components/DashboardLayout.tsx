@@ -1,4 +1,6 @@
-import { ReactNode, useState, useMemo } from "react";
+import QueryErrorNotice from "./QueryErrorNotice";
+import { useIsMobile } from "@/hooks/useIsMobile";
+import { ReactNode, useState, useMemo, useEffect, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, useLocation } from "wouter";
 import { useBranding } from "@/config/branding";
@@ -137,8 +139,27 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   }, [allMenuItems, myPerms, isSuperAdmin, isAdmin, dispatchWorkflowEnabled]);
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const compactNavigation = useIsMobile(1024);
+  const sidebarRef = useRef<HTMLElement>(null);
   const [location] = useLocation();
   const branding = useBranding();
+  useEffect(() => {
+    if (!sidebarOpen || !compactNavigation) return;
+    const previous = document.activeElement as HTMLElement | null;
+    const overflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    sidebarRef.current?.querySelector<HTMLElement>("a, button")?.focus();
+    const close = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setSidebarOpen(false);
+      if (event.key !== "Tab" || !sidebarRef.current?.contains(event.target as Node)) return;
+      const controls = [...sidebarRef.current.querySelectorAll<HTMLElement>('a[href], button:not([disabled]), [tabindex="0"]')].filter(el => el.getClientRects().length);
+      const first = controls[0], last = controls[controls.length - 1];
+      if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last?.focus(); }
+      if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first?.focus(); }
+    };
+    window.addEventListener("keydown", close);
+    return () => { window.removeEventListener("keydown", close); document.body.style.overflow = overflow; previous?.focus(); };
+  }, [sidebarOpen, compactNavigation]);
 
   const handleLogout = async () => {
     await fetch("/api/admin-auth/logout", { method: "POST", credentials: "include" });
@@ -147,25 +168,30 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
 
   return (
     <ConfirmProvider>
-    <div className="flex min-h-screen bg-[var(--surface)]">
+    <div className="workspace-shell flex min-h-screen bg-[var(--surface)]">
+      <a href="#workspace-content" className="skip-link">{t("workspace.skip")}</a>
       {/* Sidebar — Light theme */}
       <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 bg-slate-50 border-r-0 transform transition-transform lg:translate-x-0 lg:static ${
+        ref={sidebarRef}
+        inert={compactNavigation && !sidebarOpen}
+        aria-hidden={compactNavigation && !sidebarOpen ? true : undefined}
+        id="workspace-navigation"
+        className={`workspace-sidebar fixed inset-y-0 left-0 z-50 w-64 border-r-0 transform transition-transform lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
         {/* Logo area */}
         <div className="flex items-center justify-between h-16 px-6">
           <Link href="/admin" className="flex items-center gap-3">
-            <img src="/logo.png" alt={branding.companyName} className="h-8" />
+            <span className="workspace-mark" aria-hidden="true">OR</span><span className="workspace-brand">{branding.companyName}</span>
           </Link>
-          <button className="lg:hidden text-slate-400 hover:text-slate-600" onClick={() => setSidebarOpen(false)} aria-label="Close sidebar">
+          <button className="lg:hidden text-slate-400 hover:text-slate-600" onClick={() => setSidebarOpen(false)} aria-label={t("workspace.close")}>
             <X size={20} />
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="px-4 space-y-1 overflow-y-auto h-[calc(100vh-8rem)] pt-2">
+        <nav aria-label={t("workspace.navigation")} className="px-4 space-y-1 overflow-y-auto h-[calc(100vh-8rem)] pt-2">
           {menuItems.map((item, i) => {
             if ("path" in item) {
               const Icon = item.icon;
@@ -174,6 +200,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 <Link
                   key={i}
                   href={item.path}
+                  aria-current={isActive ? "page" : undefined}
                   onClick={() => setSidebarOpen(false)}
                   className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors ${
                     isActive
@@ -199,6 +226,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                     <Link
                       key={j}
                       href={sub.path}
+                      aria-current={isActive ? "page" : undefined}
                       onClick={() => setSidebarOpen(false)}
                       className={`flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm transition-colors ${
                         isActive
@@ -238,11 +266,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       )}
 
       {/* Main content */}
-      <main className="flex-1 min-w-0">
+      <main inert={compactNavigation && sidebarOpen} className="flex-1 min-w-0">
         {/* Top header — frosted glass */}
         <header className="sticky top-0 z-30 h-16 flex items-center justify-between px-4 lg:px-8 bg-[var(--surface)]/80 backdrop-blur-xl shadow-sm">
           <div className="flex items-center gap-2 sm:gap-4">
-            <button className="lg:hidden text-slate-500 hover:text-slate-700 min-h-[44px] min-w-[44px] -ml-2 inline-flex items-center justify-center" onClick={() => setSidebarOpen(true)} aria-label="Open menu">
+            <button className="lg:hidden text-slate-500 hover:text-slate-700 min-h-[44px] min-w-[44px] -ml-2 inline-flex items-center justify-center" onClick={() => setSidebarOpen(true)} aria-label={t("workspace.menu")} aria-expanded={sidebarOpen} aria-controls="workspace-navigation">
               <Menu size={24} />
             </button>
             {/* Search bar (desktop) */}
@@ -273,7 +301,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
         </header>
 
         {/* Page content */}
-        <div className="p-4 lg:p-8">{children}</div>
+        <div id="workspace-content" tabIndex={-1} className="p-4 lg:p-8"><QueryErrorNotice />{children}</div>
       </main>
 
       {/* Global search overlay */}

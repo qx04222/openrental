@@ -371,12 +371,12 @@ export default function Projects() {
         {/* Header */}
         <div className="flex items-center justify-between flex-wrap gap-4">
           <h1 className="text-3xl font-extrabold tracking-tight text-[var(--on-surface)]">{t("projects.pageTitle")}</h1>
-          <div className="flex items-center gap-2">
+          <div className="flex max-w-full flex-wrap items-center gap-2">
             <ExportToolbar
               allData={filteredData.map(mapProjectForExport)}
               pageData={pageTableData.map(mapProjectForExport)}
               selectedData={Array.from(selectedKeys).map(k => {
-                const r = (projectData || []).find((_, i) => i === k);
+                const r = (projectData || []).find(row => row.projects.id === k);
                 return r ? mapProjectForExport(r) : null;
               }).filter(Boolean) as Record<string, unknown>[]}
               columns={exportColumns}
@@ -415,6 +415,7 @@ export default function Projects() {
           emptyMessage={t("projects.noProjectsFound")}
           searchPlaceholder={t("projects.searchPlaceholder")}
           selectable
+          rowKey={(row) => row.projects.id}
           selectedKeys={selectedKeys}
           onSelectionChange={setSelectedKeys}
           onDataReady={handleDataReady}

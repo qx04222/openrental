@@ -8,7 +8,7 @@ FROM node:22-slim AS build
 WORKDIR /app
 
 # Dependencies first, so a source-only change reuses the install layer.
-COPY package.json package-lock.json ./
+COPY package.json package-lock.json .npmrc ./
 RUN npm ci
 
 COPY . .
@@ -33,4 +33,5 @@ EXPOSE 3000
 
 # The app fails fast on an invalid APP_TIMEZONE or a missing DATABASE_URL, so a
 # misconfigured container stops instead of serving wrong dates.
-CMD ["node", "dist/index.js"]
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 CMD node -e "fetch('http://127.0.0.1:'+(process.env.PORT||3000)+'/health/ready').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+CMD ["sh", "-c", "node dist/bootstrap.js && exec node dist/index.js"]

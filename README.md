@@ -8,7 +8,7 @@ Fleet ledger · order lifecycle · tiered pricing · invoicing & deposits · rec
 
 [![CI](https://github.com/qx04222/openrental/actions/workflows/ci.yml/badge.svg)](https://github.com/qx04222/openrental/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-1%2C433%20passing-brightgreen.svg)](#verify-it-yourself)
+[![Tests](https://img.shields.io/badge/tests-1%2C446%20passing-brightgreen.svg)](#verify-it-yourself)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6.svg)](tsconfig.json)
 [![Postgres](https://img.shields.io/badge/Postgres-14%2B-336791.svg)](sql/000_baseline.sql)
 
@@ -66,13 +66,15 @@ Or evaluate it without installing a toolchain:
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/qx04222/openrental)
 [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/new/template?template=https://github.com/qx04222/openrental)
 
-Both give you a private instance with its own Postgres. After the first deploy, open a shell on the service and run `npm run db:baseline && npm run seed && npm run seed:demo`.
+Production containers initialize an empty PostgreSQL database automatically. Set `DATABASE_URL` and a unique `BOOTSTRAP_ADMIN_PASSWORD` (at least 20 characters); Render generates the password for you. Read it from your service configuration and sign in as `admin`. Existing databases are preserved. Production never seeds demo accounts. See [deployment and recovery](docs/deployment.md).
 
 Locally, with Docker:
 
 ```bash
+export POSTGRES_PASSWORD="$(openssl rand -hex 24)"
+export BOOTSTRAP_ADMIN_PASSWORD="$(openssl rand -hex 24)"
+# Save these in your password manager before closing this shell.
 docker compose up --build
-docker compose exec app sh -c 'npm run db:baseline && npm run seed && npm run seed:demo'
 ```
 
 The demo seed loads a fictional yard — ten machines across five categories, six customers, orders at every stage of the lifecycle, and one invoice deliberately aged past due — so every screen has something real on the first run.
@@ -80,6 +82,14 @@ The demo seed loads a fictional yard — ten machines across five categories, si
 ---
 
 ## What you get
+
+### A desk built around today’s work
+
+Prioritized overdue work, direct invoice links, first-run setup guidance, a unified
+mobile and desktop workspace, keyboard search, and recoverable error states.
+New installations enable usability features automatically; financial automation
+remains an explicit configuration choice.
+
 
 ### Orders that survive contact with reality
 
@@ -127,7 +137,7 @@ Dispatch and return inspections on a phone: photos, hour meter, fuel level, cond
 | **Reports** | Utilization, fleet ROI, revenue by category and by customer industry, financing plans, aged receivables. |
 | **Customer portal** | Phone-OTP login, own orders and invoices, optional card checkout. |
 
-**63 tables · ~80k lines of TypeScript · 1,433 tests.**
+**63 tables · ~80k lines of TypeScript · 1,442 tests.**
 
 ---
 
@@ -149,10 +159,10 @@ Not a generic system with a currency dropdown bolted on.
 ## Verify it yourself
 
 ```bash
-npm run verify   # tsc + eslint + 1,433 tests + production build
+npm run verify   # tsc + eslint + 1,442 tests + production build
 ```
 
-The build step is not redundant with the type check — esbuild and Vite catch a class of error `tsc` does not see. CI runs all four, and it also applies the baseline schema and both seeds against a fresh Postgres, so "it installs from scratch" is verified on every commit rather than assumed.
+The build step is not redundant with the type check — esbuild and Vite catch a class of error `tsc` does not see. The configured CI runs all four, and it also applies the baseline schema and both seeds against a fresh Postgres, so "it installs from scratch" is verified on every commit rather than assumed.
 
 ---
 
@@ -174,11 +184,11 @@ Every company, person, phone number and address in the seeds, fixtures, tests an
 
 ## Project status
 
-**Extracted from production, maintained on a hobby schedule.** Worth knowing before you depend on it:
+**1.0 release candidate.** The current upgrade adds a responsive operations desk, secure bootstrap, database readiness, structured redacted logs and a full-stack regression gate. Release evidence is tracked in [the delivery ledger](docs/1.0-upgrade.md). Worth knowing before you depend on it:
 
 - The code has run a real rental business daily, so the business rules are load-bearing rather than theoretical — but it has run exactly *one* business. Expect assumptions that fit that yard and not yours.
 - It is maintained by its author in spare time. **Issues may take a while, and some will be closed as out of scope.** That is not neglect; it is the honest capacity.
-- No release cadence and no long-term support commitment yet. `main` is kept green — every commit runs type check, lint, 1,433 tests, a production build, and applies the baseline schema and both seeds to a fresh Postgres — but there are no tagged releases before 1.0.
+- No release cadence and no long-term support commitment yet. `main` is kept green — every commit runs type check, lint, 1,442 tests, a production build, and applies the baseline schema and both seeds to a fresh Postgres — but there are no tagged releases before 1.0.
 - Pull requests are genuinely welcome, especially the ones listed below. A focused PR with a test is far more likely to be merged quickly than an issue asking for a feature.
 
 If you are considering running this for real: read [SECURITY.md](SECURITY.md) first, change the seeded credentials, and treat pre-1.0 as pre-1.0.

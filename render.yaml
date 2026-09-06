@@ -1,22 +1,20 @@
 # One-click deploy to Render. https://render.com/deploy?repo=https://github.com/qx04222/openrental
 #
-# Gives you a private instance with its own Postgres. After the first deploy,
-# open a shell on the service and bootstrap the database:
-#
-#   npm run db:baseline && npm run seed && npm run seed:demo
-#
-# Then sign in at /admin as admin / admin123 and change the password.
+# Empty databases initialize automatically with a unique administrator password.
+# Existing databases are preserved; no demo users or customer fixtures are installed.
 services:
   - type: web
     name: openrental
     runtime: docker
     plan: starter
-    healthCheckPath: /health
+    healthCheckPath: /health/ready
     envVars:
       - key: DATABASE_URL
         fromDatabase:
           name: openrental-db
           property: connectionString
+      - key: BOOTSTRAP_ADMIN_PASSWORD
+        generateValue: true
       - key: NODE_ENV
         value: production
       - key: PORT

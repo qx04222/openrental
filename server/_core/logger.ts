@@ -2,14 +2,39 @@
  * Simple logger for OpenRental
  */
 
+import { randomUUID } from "node:crypto";
+import { AsyncLocalStorage } from "node:async_hooks";
 import type { Request, Response, NextFunction, ErrorRequestHandler } from "express";
 
 const isProduction = process.env.NODE_ENV === "production";
 
+export const requestContext = new AsyncLocalStorage<{ requestId: string }>();
+const secretKey = /password|secret|token|authorization|cookie|api.?key|signature|database.?url/i;
+
+export function redactLogValue(value: unknown, seen = new WeakSet<object>(), depth = 0): unknown {
+  if (typeof value === "string") return value
+    .replace(/(postgres(?:ql)?:\/\/)[^\s/@]+(?::[^\s/@]*)?@/gi, "$1[REDACTED]@")
+    .replace(/(bearer\s+)[a-z0-9._~-]+/gi, "$1[REDACTED]")
+    .replace(/((?:password|secret|token|api[_-]?key|authorization)\s*[=:]\s*)[^\s&,;]+/gi, "$1[REDACTED]");
+  if (typeof value === "bigint") return value.toString();
+  if (!value || typeof value !== "object") return value;
+  if (seen.has(value)) return "[Circular]";
+  if (depth > 8) return "[Truncated]";
+  seen.add(value);
+  if (value instanceof Error) return { name: value.name, message: redactLogValue(value.message), stack: redactLogValue(value.stack) };
+  if (Array.isArray(value)) return value.map(v => redactLogValue(v, seen, depth + 1));
+  return Object.fromEntries(Object.entries(value).map(([key, val]) => [key,
+    secretKey.test(key) ? "[REDACTED]" : redactLogValue(val, seen, depth + 1)]));
+}
+
+export function safeRequestPath(path: string): string {
+  return path.split("?")[0].replace(/(\/api\/inspection\/verify\/)[^/]+/, "$1[REDACTED]");
+}
+
 function formatMessage(level: string, message: string, meta?: Record<string, unknown>) {
-  const ts = new Date().toISOString();
-  const metaStr = meta ? " " + JSON.stringify(meta) : "";
-  return `[${ts}] [${level}] ${message}${metaStr}`;
+  return JSON.stringify({ timestamp: new Date().toISOString(), level,
+    message: redactLogValue(message), requestId: requestContext.getStore()?.requestId,
+    ...(meta ? { meta: redactLogValue(meta) } : {}) });
 }
 
 /* eslint-disable no-console -- This IS the logger; console is intentional */
@@ -34,19 +59,22 @@ export const logger = {
 export function requestLogger() {
   return (req: Request, res: Response, next: NextFunction) => {
     const start = Date.now();
+    const path = safeRequestPath(req.originalUrl);
+    const requestId = randomUUID();
+    res.setHeader("X-Request-ID", requestId);
     res.on("finish", () => {
       const duration = Date.now() - start;
       if (!req.path.startsWith("/assets") && !req.path.startsWith("/field-icons")) {
-        logger.info(`${req.method} ${req.path} ${res.statusCode} ${duration}ms`);
+        logger.info("http.request", { requestId, method: req.method, path, status: res.statusCode, durationMs: duration });
       }
     });
-    next();
+    requestContext.run({ requestId }, next);
   };
 }
 
 export function errorLogger(): ErrorRequestHandler {
   return (err: Error, req: Request, _res: Response, next: NextFunction) => {
-    logger.error(`${req.method} ${req.path}`, { error: err.message });
+    logger.error(`${req.method} ${safeRequestPath(req.originalUrl)}`, { error: err.message });
     next(err);
   };
 }
@@ -60,7 +88,7 @@ export function expressRateLimit(limit: number, windowMs: number) {
     for (const [key, val] of hits) {
       if (now > val.resetAt) hits.delete(key);
     }
-  }, 5 * 60 * 1000); // Every 5 minutes
+  }, 5 * 60 * 1000).unref(); // Every 5 minutes
 
   return (req: Request, res: Response, next: NextFunction) => {
     const key = req.ip || "unknown";
@@ -74,6 +102,7 @@ export function expressRateLimit(limit: number, windowMs: number) {
 
     entry.count++;
     if (entry.count > limit) {
+      res.setHeader("Retry-After", String(Math.ceil((entry.resetAt - now) / 1000)));
       res.status(429).json({ error: "Too many requests" });
       return;
     }

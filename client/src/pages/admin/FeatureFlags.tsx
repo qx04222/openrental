@@ -13,7 +13,7 @@ const GROUPS: Array<{ key: "phase1" | "phase2" | "phase3" | "phase4" | "phase5";
   { key: "phase1", flags: ["form_memory", "confirm_dialog", "global_search", "batch_operations"] },
   { key: "phase2", flags: ["today_dashboard", "customer_360", "utilization_dashboard", "audit_log_search"] },
   { key: "phase3", flags: ["rental_duplicate", "conflict_warning", "customer_segmentation"] },
-  { key: "phase4", flags: ["rental_renewal", "late_fee_auto", "credit_limit", "birthday_greetings", "signature_evidence"] },
+  { key: "phase4", flags: ["credit_orders", "rental_renewal", "late_fee_auto", "credit_limit", "birthday_greetings", "signature_evidence"] },
   { key: "phase5", flags: ["mid_rental_swap", "rolling_renewal_operations", "dispatch_workflow", "dispatch_inspection_required", "return_inspection_required"] },
 ];
 
@@ -72,22 +72,10 @@ export default function FeatureFlags() {
             </h2>
             <div className="bg-white border border-slate-200 rounded-lg divide-y divide-slate-100">
               {group.flags.map((key) => {
-                const flag = byKey.get(key);
+                const flag = byKey.get(key) ?? { key, enabled: false };
                 // i18n keys are dynamic — cast for the strict i18next key type
                 const name = t(`featureFlags.name.${key}` as never) as string;
                 const desc = t(`featureFlags.desc.${key}` as never) as string;
-                if (!flag) {
-                  return (
-                    <div key={key} className="p-4 flex items-center justify-between opacity-60">
-                      <div>
-                        <div className="font-medium text-slate-900">{name}</div>
-                        <div className="text-[11px] font-mono text-slate-400 mt-0.5">{key}</div>
-                        <div className="text-xs text-slate-500 mt-1">{t("featureFlags.rowMissing")}</div>
-                      </div>
-                      <span className="text-xs text-slate-400">{t("featureFlags.unavailable")}</span>
-                    </div>
-                  );
-                }
                 const pending = setEnabled.isPending && setEnabled.variables?.key === flag.key;
                 const confirming = safetyChange?.key === flag.key;
                 return (
@@ -110,6 +98,7 @@ export default function FeatureFlags() {
                         }}
                         disabled={pending}
                         role="switch"
+                        aria-label={name}
                         aria-checked={flag.enabled}
                         className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors disabled:opacity-50 ${
                           flag.enabled ? "bg-emerald-500" : "bg-slate-300"

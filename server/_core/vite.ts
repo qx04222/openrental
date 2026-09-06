@@ -3,8 +3,6 @@ import fs from "fs";
 import { type Server } from "http";
 import { nanoid } from "nanoid";
 import path from "path";
-import { createServer as createViteServer } from "vite";
-import viteConfig from "../../vite.config";
 
 // Pick the right PWA manifest based on URL prefix. Empty string means
 // "no manifest" — public marketing pages (/, /rent-equipment, /checkout, …)
@@ -25,9 +23,9 @@ function manifestLinkForUrl(url: string): string {
 }
 
 export async function setupVite(app: Express, server: Server) {
+  const { createServer: createViteServer } = await import("vite");
   const vite = await createViteServer({
-    ...viteConfig,
-    configFile: false,
+    configFile: path.resolve(process.cwd(), "vite.config.ts"),
     server: { middlewareMode: true, hmr: { server }, allowedHosts: true as const },
     appType: "custom",
   });

@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect, useRef } from "react";
+import { useState, useMemo, useCallback, useEffect, useRef, useId } from "react";
 import { useTranslation } from "react-i18next";
 import { Search, ChevronUp, ChevronDown, ChevronsUpDown } from "lucide-react";
 import { matchesTableSearch } from "@/lib/tableSearch";
@@ -82,6 +82,7 @@ export default function DataTable<T>({
   defaultSortDir = "asc",
 }: DataTableProps<T>) {
   const { t } = useTranslation("common");
+  const controlId = useId();
 
   // Some callers pass `data={query.data || []}` which yields a fresh empty
   // array literal on every render while the query is loading. That churn
@@ -212,9 +213,9 @@ export default function DataTable<T>({
       <div className="flex items-center justify-between flex-wrap gap-3 px-6 lg:px-8 py-5 border-b border-[var(--outline-variant)]/10" data-datatable-search>
         <div className="relative">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true" />
-          <label htmlFor="datatable-search" className="sr-only">{t("search")}</label>
+          <label htmlFor={`${controlId}-search`} className="sr-only">{t("search")}</label>
           <input
-            id="datatable-search"
+            id={`${controlId}-search`}
             type="text"
             placeholder={searchPlaceholder ?? t("search")}
             value={searchInput}
@@ -228,9 +229,9 @@ export default function DataTable<T>({
               {selected.size} {t("export.selected") || "selected"}
             </span>
           )}
-          <label htmlFor="datatable-pagesize">{t("show")}</label>
+          <label htmlFor={`${controlId}-pagesize`}>{t("show")}</label>
           <select
-            id="datatable-pagesize"
+            id={`${controlId}-pagesize`}
             value={pageSize}
             onChange={(e) => setPageSize(Number(e.target.value))}
             className="bg-[var(--surface-container-low)] border-none rounded-lg px-3 py-1.5 text-sm text-[var(--on-surface)]"
@@ -270,7 +271,7 @@ export default function DataTable<T>({
                     onChange={() => toggleRow(key)}
                     onClick={(e) => e.stopPropagation()}
                     className="rounded border-slate-300 text-[var(--primary)] focus:ring-[var(--primary)] mt-1 shrink-0"
-                    aria-label={`Select row ${key}`}
+                    aria-label={t("workspace.selectRow", { id: key })}
                   />
                 )}
               </div>
@@ -309,7 +310,7 @@ export default function DataTable<T>({
                     ref={(el) => { if (el) el.indeterminate = somePageSelected; }}
                     onChange={toggleAll}
                     className="rounded border-slate-300 text-[var(--primary)] focus:ring-[var(--primary)]"
-                    aria-label="Select all rows on page"
+                    aria-label={t("workspace.selectAll")}
                   />
                 </th>
               )}
@@ -319,6 +320,7 @@ export default function DataTable<T>({
                 const hideMobile = col.hideOnMobile ? "hidden md:table-cell" : "";
                 return (
                   <th
+                    scope="col"
                     key={col.key}
                     className={`py-4 px-6 text-[10px] font-extrabold uppercase tracking-widest text-[var(--muted-foreground)] select-none ${isSortable ? "cursor-pointer hover:text-[var(--on-surface)]" : ""} ${hideMobile}`}
                     onClick={isSortable ? () => handleSort(col.key) : undefined}
@@ -357,10 +359,9 @@ export default function DataTable<T>({
                   key={key}
                   className={`hover:bg-[var(--surface-container-low)]/30 transition-colors group ${onRowClick ? "cursor-pointer" : ""} ${isSelected ? "bg-[var(--primary)]/5" : ""}`}
                   onClick={onRowClick ? () => onRowClick(row) : undefined}
-                  onKeyDown={onRowClick ? (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onRowClick(row); } } : undefined}
+                  onKeyDown={onRowClick ? (e) => { if (e.target === e.currentTarget && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); onRowClick(row); } } : undefined}
                   tabIndex={onRowClick ? 0 : undefined}
-                  role={onRowClick ? "button" : undefined}
-                >
+                                  >
                   {selectable && (
                     <td className="py-5 px-4 print:hidden" onClick={(e) => e.stopPropagation()}>
                       <input
@@ -368,7 +369,7 @@ export default function DataTable<T>({
                         checked={isSelected}
                         onChange={() => toggleRow(key)}
                         className="rounded border-slate-300 text-[var(--primary)] focus:ring-[var(--primary)]"
-                        aria-label={`Select row ${key}`}
+                        aria-label={t("workspace.selectRow", { id: key })}
                       />
                     </td>
                   )}
@@ -394,12 +395,12 @@ export default function DataTable<T>({
       {/* Pagination Footer */}
       {totalRows > 0 && (
         <div className="flex items-center justify-between flex-wrap gap-3 px-6 lg:px-8 py-5 bg-[var(--surface-container-low)]/20 text-xs text-[var(--muted-foreground)]" data-datatable-pagination>
-          <span>
+          <span aria-live="polite" aria-atomic="true">
             {startIdx + 1}-{endIdx} / {totalRows}
           </span>
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              onClick={() => setPage(Math.max(0, safePage - 1))}
               disabled={safePage === 0}
               aria-label={t("previous")}
               className="p-2 border border-[var(--outline-variant)]/10 rounded-lg hover:bg-[var(--surface-container-high)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
@@ -407,10 +408,12 @@ export default function DataTable<T>({
               {t("previous")}
             </button>
             {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-              const pageNum = i;
+              const pageNum = Math.max(0, Math.min(safePage - 2, totalPages - 5)) + i;
               return (
                 <button
                   key={pageNum}
+                  aria-current={safePage === pageNum ? "page" : undefined}
+                  aria-label={t("workspace.page", { page: pageNum + 1 })}
                   onClick={() => setPage(pageNum)}
                   className={`px-3 py-1 rounded text-xs font-bold transition-colors ${
                     safePage === pageNum
@@ -423,7 +426,7 @@ export default function DataTable<T>({
               );
             })}
             <button
-              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+              onClick={() => setPage(Math.min(totalPages - 1, safePage + 1))}
               disabled={safePage >= totalPages - 1}
               aria-label={t("next")}
               className="p-2 border border-[var(--outline-variant)]/10 rounded-lg hover:bg-[var(--surface-container-high)] transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
