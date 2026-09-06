@@ -4,6 +4,7 @@ import { Link } from "wouter";
 import { ArrowUpRight, CheckCircle2, RefreshCw, Clock3 } from "lucide-react";
 import { trpc } from "@/lib/trpc";
 import QueryState from "./QueryState";
+import OperationsSuggestions from "./OperationsSuggestions";
 
 const destinations = {
   work_order: "/admin/work-orders", draft_invoice: "/admin/invoices",
@@ -28,6 +29,7 @@ export default function OperationsDesk({ empty = false }: { empty?: boolean }) {
     {empty && <div className="desk-onboarding"><div><h2>{t("desk.setupTitle")}</h2><p>{t("desk.setupDescription")}</p></div>
       <ol>{([['/admin/system-settings', 'setupCompany'], ['/admin/rental-fleet', 'setupFleet'], ['/admin/customers', 'setupCustomers'], ['/admin/rental-management', 'setupOrder']] as const).map(([href, key], index) =>
         <li key={key}><Link href={href}><span>{index + 1}</span>{t(`desk.${key}`)}<ArrowUpRight size={16} /></Link></li>)}</ol></div>}
+    {queue.data && !queue.isError && <OperationsSuggestions queue={queue.data} />}
     <div className="desk-queue">
       <div className="desk-queue-heading"><h2><Clock3 size={18} />{t("desk.queue")}</h2>
         <button className="desk-refresh" onClick={() => void queue.refetch()} disabled={queue.isFetching} aria-label={t("desk.refresh")}>

@@ -14,7 +14,7 @@ export function planningDays(start: string, count: number): string[] {
 }
 export function buildPlanningRows(assets: PlanningAsset[], bookings: PlanningBooking[], days: string[], today: string) {
   const byFleet = new Map<number, PlanningBooking[]>();
-  for (const b of bookings) byFleet.set(b.fleetId, [...(byFleet.get(b.fleetId) ?? []), b]);
+  for (const b of bookings) { const list = byFleet.get(b.fleetId); if (list) list.push(b); else byFleet.set(b.fleetId, [b]); }
   return assets.map(asset => {
     const assigned = byFleet.get(asset.id) ?? [];
     return { ...asset, days: days.map(date => {
@@ -28,4 +28,8 @@ export function buildPlanningRows(assets: PlanningAsset[], bookings: PlanningBoo
       return { date, state, overdue, conflict: rentals.length > 1, rentals };
     }) };
   });
+}
+
+export function isPlanningWindowAvailable(days: { state: PlanningState }[]): boolean {
+  return days.length > 0 && days.every(day => day.state === "available");
 }

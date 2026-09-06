@@ -98,7 +98,7 @@ function FinanceOrderCell({ id, value, onSave }: { id: number; value: string; on
 }
 
 export default function RentalManagement() {
-  const { t } = useTranslation(["rental", "common"]);
+  const { t } = useTranslation(["rental", "common", "admin"]);
   const utils = trpc.useUtils();
   // Copy one rental as a Transportation Log row (TSV → clipboard). Fetches the
   // hydrated order (incl. inspection / prepayment summaries) so the row matches

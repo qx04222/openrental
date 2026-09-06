@@ -24,23 +24,23 @@ export default defineConfig({
   build: {
     outDir: path.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true,
-    sourcemap: process.env.NODE_ENV !== "production",
+    sourcemap: process.env.GENERATE_SOURCEMAP === "true",
+    manifest: true,
     chunkSizeWarningLimit: 700,
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          if (!id.includes("node_modules")) return undefined;
-          // wouter uses use-sync-external-store on first load. Keep that
-          // tiny shared shim out of chart chunks so charts stay lazy-loaded.
-          if (id.includes("use-sync-external-store")) return "react-store-vendor";
-          if (id.includes("react-is")) return "react-compat-vendor";
-          // recharts + d3 are heavy and should only load with lazy report pages.
-          if (id.includes("d3-") || id.includes("recharts") || id.includes("react-smooth") || id.includes("victory-vendor")) return "charts-vendor";
-          if (id.includes("date-fns")) return "date-vendor";
-          if (id.includes("react-hook-form")) return "form-vendor";
-          if (id.includes("@tanstack/react-query") || id.includes("@trpc")) return "query-vendor";
-          if (id.includes("@radix-ui")) return "radix-vendor";
-          return undefined;
+        codeSplitting: {
+          groups: [
+            // Capture shared React before chart dependencies can absorb it.
+            { name: "react-vendor", test: /[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/, priority: 100 },
+            { name: "react-store-vendor", test: /use-sync-external-store/, priority: 90 },
+            { name: "react-compat-vendor", test: /react-is/, priority: 90 },
+            { name: "query-vendor", test: /@tanstack[\\/]react-query|@trpc/, priority: 80 },
+            { name: "radix-vendor", test: /@radix-ui/, priority: 70 },
+            { name: "charts-vendor", test: /d3-|recharts|react-smooth|victory-vendor/, priority: 40 },
+            { name: "date-vendor", test: /date-fns/, priority: 30 },
+            { name: "form-vendor", test: /react-hook-form/, priority: 30 },
+          ],
         },
         chunkFileNames: "assets/js/[name]-[hash].js",
         entryFileNames: "assets/js/[name]-[hash].js",

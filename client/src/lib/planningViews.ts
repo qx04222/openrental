@@ -1,10 +1,10 @@
-export interface PlanningFilters { search: string; category: string; location: string; status: "all" | "available" | "attention"; days: 7 | 14 | 28 }
+export interface PlanningFilters { search: string; category: string; location: string; status: "all" | "available" | "available_window" | "attention"; days: 7 | 14 | 28 }
 export interface PlanningView { id: string; name: string; filters: PlanningFilters }
 export const defaultPlanningFilters: PlanningFilters = { search: "", category: "", location: "", status: "all", days: 14 };
 export function readPlanningFilters(value: unknown): PlanningFilters {
   const v = value && typeof value === "object" ? value as Record<string, unknown> : {};
   const text = (key: string) => typeof v[key] === "string" ? (v[key] as string).slice(0, 100) : "";
-  return { search: text("search"), category: text("category"), location: text("location"), status: v.status === "available" || v.status === "attention" ? v.status : "all", days: v.days === 7 || v.days === 28 ? v.days : 14 };
+  return { search: text("search"), category: text("category"), location: text("location"), status: v.status === "available" || v.status === "available_window" || v.status === "attention" ? v.status : "all", days: v.days === 7 || v.days === 28 ? v.days : 14 };
 }
 export function planningStorageKey(identity: string): string { return `openrental:planning:v2:${encodeURIComponent(identity)}`; }
 export function decodePlanningViews(raw: string | null): PlanningView[] {

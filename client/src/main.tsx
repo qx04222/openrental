@@ -1,3 +1,4 @@
+import { createOperationalRefresh, shouldRefreshOperations } from "./lib/operationalRefresh";
 import { mutationDefaults } from "./lib/networkPolicy";
 import { trpc } from "@/lib/trpc";
 import { UNAUTHED_ERR_MSG } from "../../shared/const";
@@ -25,7 +26,9 @@ const shouldRetry = (failureCount: number, error: unknown): boolean => {
 const getRetryDelay = (attemptIndex: number): number => Math.min(1000 * 2 ** attemptIndex, 10000);
 
 const queryClient = new QueryClient({
-  mutationCache: new MutationCache({ onError: (error) => {
+  mutationCache: new MutationCache({
+    onSuccess: (_data, _variables, _context, mutation) => { if (shouldRefreshOperations(mutation.options.mutationKey)) refreshOperations(); },
+    onError: (error) => {
     if (!(error instanceof TRPCClientError) || !error.data?.code) {
       toast.error(i18n.t("workspace.uncertainWrite"), { duration: 12000 });
     }
@@ -45,6 +48,11 @@ const queryClient = new QueryClient({
       retryDelay: getRetryDelay,
     },
   },
+});
+
+const refreshOperations = createOperationalRefresh(queryClient);
+if ("serviceWorker" in navigator) navigator.serviceWorker.addEventListener("message", event => {
+  if (event.data?.type === "INSPECTION_SYNC_FINISHED") refreshOperations();
 });
 
 const trpcClient = trpc.createClient({

@@ -1,5 +1,9 @@
 @import "tailwindcss";
 
+/* Self-host the two typefaces actually used by the application. */
+@font-face { font-family: "DM Sans"; font-style: normal; font-weight: 100 1000; font-display: swap; src: url("@fontsource-variable/dm-sans/files/dm-sans-latin-wght-normal.woff2") format("woff2"); }
+@font-face { font-family: "Archivo"; font-style: normal; font-weight: 100 900; font-display: swap; src: url("@fontsource-variable/archivo/files/archivo-latin-wght-normal.woff2") format("woff2"); }
+
 /* ─── Design Tokens (Material Design 3 inspired) ─── */
 :root {
   /* Primary brand */
@@ -66,19 +70,19 @@
 /* ─── Global Typography ─── */
 body {
   margin: 0;
-  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  font-family: "DM Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   background-color: var(--surface);
   color: var(--on-surface);
   -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3, h4, .font-headline {
-  font-family: "Plus Jakarta Sans", "Inter", sans-serif;
+  font-family: "Archivo", "DM Sans", sans-serif;
 }
 
 /* Industrial display face for the public standalone-site headlines. */
 .font-display {
-  font-family: "Archivo", "Plus Jakarta Sans", "Inter", sans-serif;
+  font-family: "Archivo", "DM Sans", sans-serif;
 }
 
 /* Material Symbols baseline */
@@ -93,7 +97,7 @@ h1, h2, h3, h4, .font-headline {
   padding: 0.625rem 1.5rem;
   border-radius: 0.5rem;
   font-weight: 700;
-  font-family: "Inter", sans-serif;
+  font-family: "DM Sans", sans-serif;
   letter-spacing: 0.01em;
   transition: all 0.2s;
   cursor: pointer;
@@ -124,7 +128,7 @@ h1, h2, h3, h4, .font-headline {
   padding: 0.625rem 1.5rem;
   border-radius: 0.5rem;
   font-weight: 500;
-  font-family: "Inter", sans-serif;
+  font-family: "DM Sans", sans-serif;
   transition: background-color 0.2s;
   cursor: pointer;
   border: 1px solid var(--outline-variant);
@@ -332,3 +336,5 @@ textarea:focus {
 @media(max-width:700px){.planning-controls{padding:14px}.planning-filterbar>label{flex:1 1 42%}.planning-datebar{gap:7px}.planning-views>label{flex:1 1 40%}.planning-views small{max-width:none}.planning-summary{gap:16px}.planning-summary>div{min-width:70px}.planning-summary label{margin-left:0;flex:1 1 100%}.planning-timeline{display:none}.planning-mobile-list{display:grid;gap:10px}.planning-mobile-card{text-align:left;border:1px solid #d4dfce;border-radius:10px;padding:15px;display:grid;gap:8px}.planning-mobile-card span{font-size:12px}.planning-order span{margin-left:0}.planning-detail{padding:16px}.planning-legend{gap:8px}.planning-header .btn-secondary{min-height:36px}}
 .ops-release{display:flex;align-items:center;gap:18px;flex-wrap:wrap;background:#254735;color:#e3efd9;border-radius:10px;padding:15px 20px;font-size:13px}.ops-release>span:first-child{display:flex;gap:8px;align-items:center;font-weight:700}.ops-release small{margin-left:auto;font-size:11px}.ops-metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.ops-metrics>div{background:#fff;border:1px solid #dbe3d7;padding:22px;border-radius:12px;display:grid;gap:6px}.ops-metrics strong{font:800 36px Archivo,sans-serif;color:#34583d}.ops-metrics span{font-size:12px;color:#6a786b}.ops-section{background:#fff;border:1px solid #dde5d9;border-radius:14px;padding:24px}.ops-section h2{font-size:20px;font-weight:750}.ops-section>p{font-size:13px;color:#637568;margin:8px 0 20px;max-width:850px}.ops-items{display:grid;gap:10px}.ops-empty{padding:20px;background:#f5f8f1;border-radius:10px;font-size:13px;color:#547447}.ops-effect{display:flex;gap:18px;align-items:center;padding:15px;border:1px solid #e5e9df;border-radius:10px;color:#293e30}.ops-effect>div{display:grid;gap:5px;font-size:13px}.ops-effect>div:nth-child(2){margin-left:auto}.ops-effect small{color:#758373;font-size:11px}.ops-status{display:inline-flex;justify-content:center;align-items:center;border-radius:20px;background:#edf0e8;color:#53634c;padding:4px 9px;font-size:10px;font-weight:750;white-space:nowrap}.ops-status-failed,.ops-status-manual_review{background:#f9e0d5;color:#963c2b}.ops-status-warning{background:#fbefc9;color:#876517}.ops-status-running,.ops-status-processing{background:#dce9f2;color:#375e7c}.ops-status-completed{background:#e1eed9;color:#3c662f}.ops-job-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}.ops-job{padding:18px;background:#f8faf5;border:1px solid #e3e8db;border-radius:10px}.ops-job>div{display:flex;gap:10px;justify-content:space-between;align-items:center}.ops-job h3{font-size:14px;font-weight:700}.ops-job>p{font-size:11px;color:#778572;margin:7px 0 18px}.ops-job dl{display:grid;gap:7px;font-size:11px}.ops-job dl>div{display:flex;justify-content:space-between;gap:8px}.ops-job dt{color:#758171}.ops-job dd{color:#3b553e;text-align:right}
 @media(max-width:700px){.ops-metrics{grid-template-columns:repeat(2,1fr);gap:10px}.ops-metrics>div{padding:16px}.ops-section{padding:16px}.ops-job-grid{grid-template-columns:1fr}.ops-release small{margin-left:0}.ops-effect{flex-wrap:wrap;gap:10px}.ops-effect>div:nth-child(2){margin-left:0}.ops-effect>svg{margin-left:auto}}
+
+.desk-suggestions{margin:24px 0}.desk-suggestions-heading{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}.desk-suggestions h2{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:700}.desk-suggestions-heading p{font-size:12px;color:#65776c}.desk-suggestion-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.desk-suggestion{display:grid;gap:10px;border:1px solid #d5dfcf;border-radius:12px;padding:18px;background:#fff;color:#233b2e}.desk-suggestion:hover{border-color:#557247;background:#f7faf2}.desk-suggestion>div{display:flex;align-items:center;gap:10px}.desk-suggestion svg{margin-left:auto}.suggestion-number{font-family:Archivo,sans-serif;font-weight:800;color:#899f7c}.suggestion-urgency{font-size:10px;font-weight:700;border-radius:4px;padding:3px 6px;background:#e9eee6}.suggestion-urgent{background:#f8e4db;color:#8a3824}.suggestion-attention{background:#f1e7cd;color:#805815}.desk-suggestion h3{font-size:14px;font-weight:700}.desk-suggestion p{font-size:12px;color:#5e7164}.desk-suggestion small{font-size:11px;color:#6b7c70}.planning-pagination{display:flex;align-items:center;justify-content:flex-end;gap:10px;flex-wrap:wrap;font-size:12px;color:#607566}@media(max-width:900px){.desk-suggestion-grid{grid-template-columns:1fr}.desk-suggestion{padding:14px}}

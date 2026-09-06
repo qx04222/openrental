@@ -31,7 +31,7 @@ const TIME_SLOT_OPTIONS = [
 ];
 
 export default function Dispatch() {
-  const { t } = useTranslation(["dispatch", "common"]);
+  const { t } = useTranslation(["dispatch", "common", "inspection"]);
   const { data: myPerms } = trpc.rolePermissions.getMyPermissions.useQuery();
   const can = (module: Parameters<typeof canUseModulePermission>[1], action: Parameters<typeof canUseModulePermission>[2]) =>
     canUseModulePermission(myPerms, module, action);

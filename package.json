@@ -1,6 +1,6 @@
 {
   "name": "openrental",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "type": "module",
   "license": "Apache-2.0",
   "scripts": {
@@ -14,11 +14,12 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "db:seed": "tsx server/db/seed.ts",
-    "verify": "npm run check && npm run lint:ci && npm run i18n:check && npm run test && npm run build",
+    "verify": "npm run check && npm run lint:ci && npm run i18n:check && npm run test && npm run build && npm run perf:budget",
     "seed": "tsx server/db/seed.ts",
     "seed:demo": "tsx server/db/seedDemo.ts",
     "db:baseline": "psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -f sql/000_baseline.sql",
-    "i18n:check": "node scripts/check-i18n.mjs"
+    "i18n:check": "node scripts/check-i18n.mjs",
+    "perf:budget": "node scripts/check-bundle-budget.mjs"
   },
   "dependencies": {
     "@fullcalendar/core": "6.1.21",
@@ -82,6 +83,8 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
+    "@fontsource-variable/archivo": "^5.3.0",
+    "@fontsource-variable/dm-sans": "^5.3.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/bcrypt": "^6.0.0",
     "@types/compression": "^1.7.5",

@@ -297,5 +297,19 @@
     "setupFleet": "录入设备",
     "setupCustomers": "录入客户",
     "setupOrder": "创建租赁订单"
-  }
+  },
+  "suggestions.title": "建议先处理",
+  "suggestions.subtitle": "按等待时间和业务影响排序，每条建议都有依据。",
+  "suggestions.planned": "待安排",
+  "suggestions.attention": "需关注",
+  "suggestions.urgent": "长时间逾期",
+  "suggestions.evidence": "已等待 {{age}} 天 · 处理目标 {{target}} 天",
+  "suggestions.reason.work_order": "先处理占用设备的工单，再承诺下一次出租。",
+  "suggestions.reason.draft_invoice": "复核发票草稿，让已经完成的业务进入开票环节。",
+  "suggestions.reason.damage_claim": "完成损坏评估，并确认是否需要计费。",
+  "suggestions.reason.dispatch_order": "与负责团队确认送货或取回安排。",
+  "suggestions.reason.extension_request": "回应客户的延期申请，同时核实设备后续可用性。",
+  "suggestions.reason.held_deposit": "核对已结束订单，决定押金应如何结算。",
+  "suggestions.reason.unbilled_credit_charges": "复核已结算信用订单中尚未开票的费用。",
+  "suggestions.reason.overdue_invoice": "核对未付余额，再选择合适的跟进方式。"
 }

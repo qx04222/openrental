@@ -496,5 +496,11 @@
   "ops.job.rental_reminders": "Rental reminders",
   "ops.schedule.rental_reminders": "Daily 09:00",
   "ops.job.quotation_expiry": "Quotation expiry",
-  "ops.schedule.quotation_expiry": "Daily 04:00"
+  "ops.schedule.quotation_expiry": "Daily 04:00",
+  "planning.available_window": "Available for the entire window",
+  "planning.pages": "Equipment pages",
+  "planning.pageRange": "Showing {{start}}–{{end}} of {{total}} assets",
+  "planning.previousPage": "Previous page",
+  "planning.nextPage": "Next page",
+  "workspace.languageFailed": "Language could not load. Check your connection and try again."
 }

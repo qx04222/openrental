@@ -297,5 +297,19 @@
     "setupFleet": "Add equipment",
     "setupCustomers": "Add customers",
     "setupOrder": "Create a rental"
-  }
+  },
+  "suggestions.title": "Suggested next steps",
+  "suggestions.subtitle": "Ranked by waiting time and operational impact. Every suggestion has a reason.",
+  "suggestions.planned": "Upcoming",
+  "suggestions.attention": "Needs attention",
+  "suggestions.urgent": "Long overdue",
+  "suggestions.evidence": "Waiting {{age}} days · handling target {{target}} days",
+  "suggestions.reason.work_order": "Resolve the work holding equipment before promising its next rental.",
+  "suggestions.reason.draft_invoice": "Review the draft so completed work can move into billing.",
+  "suggestions.reason.damage_claim": "Resolve the damage assessment and its billing decision.",
+  "suggestions.reason.dispatch_order": "Confirm the delivery or pickup arrangements with the assigned team.",
+  "suggestions.reason.extension_request": "Give the waiting customer a decision and check equipment availability.",
+  "suggestions.reason.held_deposit": "Review the ended rental and decide how to settle the held deposit.",
+  "suggestions.reason.unbilled_credit_charges": "Review settled credit work that still has unbilled charges.",
+  "suggestions.reason.overdue_invoice": "Review the unpaid balance and choose an appropriate follow-up."
 }

@@ -57,6 +57,9 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Initial load performance budget
+        run: npm run perf:budget
+
       - name: Schema baseline applies cleanly
         run: psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -q -f sql/000_baseline.sql
 

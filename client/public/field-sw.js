@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-const CACHE_NAME = "openrental-field-v3";
+const CACHE_NAME = "openrental-field-v4";
 const DB_NAME = "openrental-field-db";
 const DB_STORE = "pendingInspections";
 
@@ -32,6 +32,7 @@ self.addEventListener("activate", (event) => {
 // Fetch: network-first for API, cache-first for assets
 self.addEventListener("fetch", (event) => {
   const url = new URL(event.request.url);
+  if (event.request.method !== "GET" || url.origin !== self.location.origin) return;
 
   // API requests: network only (don't cache)
   if (url.pathname.startsWith("/api/")) {
@@ -45,7 +46,7 @@ self.addEventListener("fetch", (event) => {
         if (cached) return cached;
         return fetch(event.request).then((response) => {
           const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           return response;
         });
       })
@@ -59,7 +60,7 @@ self.addEventListener("fetch", (event) => {
       fetch(event.request)
         .then((response) => {
           const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          if (response.ok) caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
           return response;
         })
         .catch(() => {

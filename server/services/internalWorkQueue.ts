@@ -1,4 +1,5 @@
 import { sql } from "drizzle-orm";
+import { APP_TIMEZONE, calendarDateStringInTimeZone } from "../_core/dateUtils";
 import type { getDb } from "../db";
 
 type AppDb = NonNullable<Awaited<ReturnType<typeof getDb>>>;
@@ -94,10 +95,14 @@ interface RawRow {
   status: string | null;
   age_days: number | string;
   detail: string | null;
+  group_count?: number | string;
+  group_overdue?: number | string;
 }
 
-export async function getInternalWorkQueue(db: ExecuteDb): Promise<WorkQueueSummary> {
+export async function getInternalWorkQueue(db: ExecuteDb, now = new Date()): Promise<WorkQueueSummary> {
+  const today = calendarDateStringInTimeZone(now);
   const rows = await db.execute(sql`
+    WITH raw_items AS (
     -- Work orders holding equipment. Anything not closed out still blocks the
     -- unit (see fleetAvailability.listOperationalFleetBlocks).
     SELECT
@@ -105,7 +110,7 @@ export async function getInternalWorkQueue(db: ExecuteDb): Promise<WorkQueueSumm
       wo.id,
       COALESCE(wo."workOrderNumber", '#' || wo.id) AS ref,
       wo.status::text AS status,
-      (CURRENT_DATE - wo."createdAt"::date) AS age_days,
+      (${today}::date - (wo."createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${APP_TIMEZONE})::date) AS age_days,
       COALESCE(NULLIF(rf."serialNumber", ''), rf."assetNumber") AS detail
     FROM work_orders wo
     LEFT JOIN rental_fleet rf ON rf.id = wo."rentalFleetId"
@@ -120,7 +125,7 @@ export async function getInternalWorkQueue(db: ExecuteDb): Promise<WorkQueueSumm
       i.id,
       COALESCE(i."invoiceNumber", '#' || i.id) AS ref,
       i.status::text AS status,
-      (CURRENT_DATE - i."createdAt"::date) AS age_days,
+      (${today}::date - (i."createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${APP_TIMEZONE})::date) AS age_days,
       COALESCE(NULLIF(c.company, ''), c.name, '') || ' · $' || ROUND(i."totalAmount"::numeric, 2) AS detail
     FROM invoices i
     LEFT JOIN rental_requests r ON r.id = i."rentalId"
@@ -137,7 +142,7 @@ export async function getInternalWorkQueue(db: ExecuteDb): Promise<WorkQueueSumm
       dc.id,
       '#' || dc.id AS ref,
       dc.status::text AS status,
-      (CURRENT_DATE - dc."createdAt"::date) AS age_days,
+      (${today}::date - (dc."createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${APP_TIMEZONE})::date) AS age_days,
       COALESCE(NULLIF(c.company, ''), c.name, '') AS detail
     FROM damage_claims dc
     LEFT JOIN customers c ON c.id = dc."customerId"
@@ -154,7 +159,7 @@ export async function getInternalWorkQueue(db: ExecuteDb): Promise<WorkQueueSumm
       d.id,
       COALESCE(r."rentalNumber", '#' || d.id) AS ref,
       d.status::text AS status,
-      (CURRENT_DATE - d."createdAt"::date) AS age_days,
+      (${today}::date - (d."createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${APP_TIMEZONE})::date) AS age_days,
       d."deliveryAddress" AS detail
     FROM dispatch_orders d
     LEFT JOIN rental_requests r ON r.id = d."rentalRequestId"
@@ -169,7 +174,7 @@ export async function getInternalWorkQueue(db: ExecuteDb): Promise<WorkQueueSumm
       er.id,
       COALESCE(r."rentalNumber", '#' || er.id) AS ref,
       er.status::text AS status,
-      (CURRENT_DATE - er."createdAt"::date) AS age_days,
+      (${today}::date - (er."createdAt" AT TIME ZONE 'UTC' AT TIME ZONE ${APP_TIMEZONE})::date) AS age_days,
       COALESCE(NULLIF(c.company, ''), c.name, '') AS detail
     FROM extension_requests er
     LEFT JOIN rental_requests r ON r.id = er."rentalRequestId"
@@ -189,7 +194,7 @@ export async function getInternalWorkQueue(db: ExecuteDb): Promise<WorkQueueSumm
       r.id,
       COALESCE(r."rentalNumber", '#' || r.id) AS ref,
       r.status::text AS status,
-      (CURRENT_DATE - r."endDate"::date) AS age_days,
+      (${today}::date - (r."endDate" AT TIME ZONE 'UTC' AT TIME ZONE ${APP_TIMEZONE})::date) AS age_days,
       COALESCE(NULLIF(c.company, ''), c.name, '') || ' · $'
         || ROUND(SUM(p.amount::numeric), 2) AS detail
     FROM rental_requests r
@@ -218,7 +223,7 @@ export async function getInternalWorkQueue(db: ExecuteDb): Promise<WorkQueueSumm
       r.id,
       COALESCE(r."rentalNumber", '#' || r.id) AS ref,
       r.status::text AS status,
-      (CURRENT_DATE - r."creditFinalizedAt"::date) AS age_days,
+      (${today}::date - (r."creditFinalizedAt" AT TIME ZONE 'UTC' AT TIME ZONE ${APP_TIMEZONE})::date) AS age_days,
       COALESCE(NULLIF(c.company, ''), c.name, '') || ' · $'
         || ROUND(SUM(rc.amount::numeric), 2) AS detail
     FROM rental_requests r
@@ -245,7 +250,7 @@ export async function getInternalWorkQueue(db: ExecuteDb): Promise<WorkQueueSumm
       i.id,
       COALESCE(i."invoiceNumber", '#' || i.id) AS ref,
       i.status::text AS status,
-      (CURRENT_DATE - i."dueDate"::date) AS age_days,
+      (${today}::date - (i."dueDate" AT TIME ZONE 'UTC' AT TIME ZONE ${APP_TIMEZONE})::date) AS age_days,
       COALESCE(NULLIF(c.company, ''), c.name, '') || ' · $'
         || ROUND(i."balanceDue"::numeric, 2) AS detail
     FROM invoices i
@@ -255,7 +260,16 @@ export async function getInternalWorkQueue(db: ExecuteDb): Promise<WorkQueueSumm
       AND i.status IN ('sent', 'partial', 'overdue')
       AND i."balanceDue"::numeric > 0
       AND i."dueDate" IS NOT NULL
-      AND i."dueDate"::date < CURRENT_DATE
+      AND (i."dueDate" AT TIME ZONE 'UTC' AT TIME ZONE ${APP_TIMEZONE})::date < ${today}::date
+    ), sla AS (
+      SELECT * FROM (VALUES ${sql.join(Object.entries(WORK_QUEUE_SLA_DAYS).map(([kind, days]) => sql`(${kind}::text, ${days}::int)`), sql`, `)}) AS rules(kind, days)
+    ), ranked AS (
+      SELECT raw_items.*,
+        count(*) OVER (PARTITION BY raw_items.kind)::int AS group_count,
+        count(*) FILTER (WHERE age_days >= sla.days) OVER (PARTITION BY raw_items.kind)::int AS group_overdue,
+        row_number() OVER (PARTITION BY raw_items.kind ORDER BY age_days DESC NULLS LAST, id ASC) AS position
+      FROM raw_items JOIN sla ON sla.kind = raw_items.kind
+    ) SELECT * FROM ranked WHERE position <= ${ITEMS_PER_KIND}
   `) as unknown as RawRow[];
 
   return summarizeWorkQueue(rows);
@@ -264,9 +278,11 @@ export async function getInternalWorkQueue(db: ExecuteDb): Promise<WorkQueueSumm
 /** Split out from the query so the bucketing rules are testable without a database. */
 export function summarizeWorkQueue(rows: RawRow[]): WorkQueueSummary {
   const byKind = new Map<WorkQueueKind, WorkQueueItem[]>();
+  const totals = new Map<WorkQueueKind, { count: number; overdue: number }>();
 
   for (const row of rows) {
-    const ageDays = Number(row.age_days) || 0;
+    if (row.group_count !== undefined && row.group_overdue !== undefined) totals.set(row.kind, { count: Number(row.group_count), overdue: Number(row.group_overdue) });
+    const ageDays = Math.max(0, Number(row.age_days) || 0);
     const item: WorkQueueItem = {
       id: Number(row.id),
       ref: row.ref || `#${row.id}`,
@@ -283,15 +299,15 @@ export function summarizeWorkQueue(rows: RawRow[]): WorkQueueSummary {
   const buckets: WorkQueueBucket[] = [];
   for (const [kind, items] of byKind) {
     // Oldest first: the thing that has been waiting longest is the thing to do.
-    items.sort((a, b) => b.ageDays - a.ageDays);
+    items.sort((a, b) => b.ageDays - a.ageDays || a.id - b.id);
     buckets.push({
       kind,
       slaDays: WORK_QUEUE_SLA_DAYS[kind],
-      count: items.length,
-      overdueCount: items.filter((item) => item.overdue).length,
+      count: totals.get(kind)?.count ?? items.length,
+      overdueCount: totals.get(kind)?.overdue ?? items.filter((item) => item.overdue).length,
       oldestAgeDays: items[0]?.ageDays ?? 0,
       items: items.slice(0, ITEMS_PER_KIND),
-      truncated: items.length > ITEMS_PER_KIND,
+      truncated: (totals.get(kind)?.count ?? items.length) > ITEMS_PER_KIND,
     });
   }
 

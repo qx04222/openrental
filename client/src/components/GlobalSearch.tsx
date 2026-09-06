@@ -12,10 +12,10 @@ import { getGlobalSearchPath } from "@/lib/adminSearchNavigation";
 import { translateDynamic } from "@/lib/i18nHelpers";
 
 export default function GlobalSearch() {
-  const { t } = useTranslation(["common", "admin"]);
-  const { t: tAdmin } = useTranslation("admin");
+  const { t } = useTranslation("common");
   const [, setLocation] = useLocation();
   const [open, setOpen] = useState(false);
+  const { t: tAdmin } = useTranslation(open ? "admin" : "common");
   const [query, setQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
   useEffect(() => { const timer = setTimeout(() => setDebouncedQuery(query.trim()), 200); return () => clearTimeout(timer); }, [query]);

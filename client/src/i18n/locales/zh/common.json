@@ -496,5 +496,11 @@
   "ops.job.rental_reminders": "租赁提醒",
   "ops.schedule.rental_reminders": "每天 09:00",
   "ops.job.quotation_expiry": "报价到期处理",
-  "ops.schedule.quotation_expiry": "每天 04:00"
+  "ops.schedule.quotation_expiry": "每天 04:00",
+  "planning.available_window": "整个时段连续可用",
+  "planning.pages": "设备分页",
+  "planning.pageRange": "显示第 {{start}}–{{end}} 台，共 {{total}} 台",
+  "planning.previousPage": "上一页",
+  "planning.nextPage": "下一页",
+  "workspace.languageFailed": "语言包加载失败，请检查网络后重试。"
 }
