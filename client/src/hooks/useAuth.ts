@@ -1,34 +1,10 @@
-import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { adminSessionQueryKey, loadAdminSession } from "@/lib/adminSession";
 
-interface AuthState {
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  user: { userId: number; email: string; role: string } | null;
-}
-
-export function useAuth(): AuthState {
-  const [state, setState] = useState<AuthState>({
-    isAuthenticated: false,
-    isLoading: true,
-    user: null,
-  });
-
-  useEffect(() => {
-    async function checkAuth() {
-      try {
-        const res = await fetch("/api/admin-auth/verify-session", { credentials: "include" });
-        if (res.ok) {
-          const data = await res.json();
-          setState({ isAuthenticated: true, isLoading: false, user: data });
-        } else {
-          setState({ isAuthenticated: false, isLoading: false, user: null });
-        }
-      } catch {
-        setState({ isAuthenticated: false, isLoading: false, user: null });
-      }
-    }
-    checkAuth();
-  }, []);
-
-  return state;
+export function useAuth() {
+  // Layout, route guard and page share one request and one consistent identity.
+  const query = useQuery({ queryKey: adminSessionQueryKey, queryFn: loadAdminSession,
+    staleTime: 30_000, retry: false, refetchOnMount: true });
+  return { isAuthenticated: Boolean(query.data), isLoading: query.isPending,
+    user: query.data ?? null, isError: query.isError, retry: () => { void query.refetch(); } };
 }

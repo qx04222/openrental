@@ -1,3 +1,4 @@
+import { useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { useLocation } from "wouter";
 import { useTranslation } from "react-i18next";
@@ -12,6 +13,7 @@ export default function AdminLogin() {
   const [loading, setLoading] = useState(false);
   const [, setLocation] = useLocation();
   const branding = useBranding();
+  const queryClient = useQueryClient();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,6 +39,8 @@ export default function AdminLogin() {
         return;
       }
 
+      // Never carry the previous account's cached business data into this login.
+      queryClient.clear();
       setLocation("/admin");
     } catch {
       setError(t("login.networkError"));

@@ -1,11 +1,12 @@
 import { type ReactNode } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/hooks/useAuth";
+import QueryState from "@/components/QueryState";
 import { Redirect } from "wouter";
 
 export default function AdminRoute({ children }: { children: ReactNode }) {
   const { t } = useTranslation("admin");
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated, isLoading, isError, retry } = useAuth();
 
   if (isLoading) {
     return (
@@ -14,6 +15,8 @@ export default function AdminRoute({ children }: { children: ReactNode }) {
       </div>
     );
   }
+
+  if (isError) return <QueryState loading={false} onRetry={retry} />;
 
   if (!isAuthenticated) {
     return <Redirect to="/admin/login" />;
