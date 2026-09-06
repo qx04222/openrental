@@ -1,3 +1,5 @@
+import { operationsRouter } from "./operations.router";
+import { planningRouter } from "./planning.router";
 import { router, mergeRouters } from "../_core/trpc";
 import { fieldAuthRouter } from "./fieldAuth";
 import { rentalFleetRouter } from "./rentalFleet.router";
@@ -50,6 +52,8 @@ import { rentalAssetProgressRouter } from "./rentalAssetProgress.router";
 import { rollingRentalsRouter } from "./rollingRentals.router";
 
 const baseRouter = router({
+  planning: planningRouter,
+  operations: operationsRouter,
   dashboard: dashboardRouter,
   fieldAuth: fieldAuthRouter,
   rentalFleet: rentalFleetRouter,

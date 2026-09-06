@@ -179,6 +179,7 @@ router.get("/verify-session", async (req: Request, res: Response) => {
 
   res.json({
     isAuthenticated: true,
+    userId: session.userId,
     email: session.email,
     role: session.role,
     expiresAt: session.expiresAt.toISOString(),

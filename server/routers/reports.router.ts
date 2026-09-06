@@ -1113,7 +1113,7 @@ export const reportsRouter = router({
   operationalHealth: protectedProcedure.use(moduleGuard('reports', 'read'))
     .query(async () => {
       const db = await getDb();
-      if (!db) return { items: [], count: 0 };
+      if (!db) throw new TRPCError({ code: "INTERNAL_SERVER_ERROR", message: "Operational health unavailable" });
       const policies = await getRentalOperationPolicies();
       const rows: Record<string, unknown>[] = await db.execute(sql`
         -- approved non-credit orders with no contract generated

@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
-  user: { email: string; role: string } | null;
+  user: { userId: number; email: string; role: string } | null;
 }
 
 export function useAuth(): AuthState {

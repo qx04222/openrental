@@ -7,6 +7,9 @@ import { Toaster } from "sonner";
 import AdminRoute from "@/components/AdminRoute";
 import Analytics from "@/components/Analytics";
 
+const OperationsPage = lazy(() => import("@/pages/admin/Operations"));
+const PlanningPage = lazy(() => import("@/pages/admin/Planning"));
+
 // Lazy loaded pages
 const AdminLogin = lazy(() => import("@/pages/admin/AdminLogin"));
 const AdminDashboard = lazy(() => import("@/pages/admin/Dashboard"));
@@ -178,6 +181,8 @@ export default function App() {
           <Route path="/admin/login" component={AdminLogin} />
           <Route path="/admin">{() => <AdminPage component={AdminDashboard} />}</Route>
           <Route path="/admin/rental-fleet/:id/inspections">{() => <AdminPage component={FleetInspectionHistory} />}</Route>
+          <Route path="/admin/operations">{() => <AdminPage component={OperationsPage} />}</Route>
+          <Route path="/admin/planning">{() => <AdminPage component={PlanningPage} />}</Route>
           <Route path="/admin/rental-fleet">{() => <AdminPage component={RentalFleetPage} />}</Route>
           <Route path="/admin/rental-management">{() => <AdminPage component={RentalManagement} />}</Route>
           <Route path="/admin/dispatch">{() => <AdminPage component={DispatchPage} />}</Route>

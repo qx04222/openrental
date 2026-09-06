@@ -126,11 +126,24 @@ def api_admin():
 
 
 def api_field(identifier="inspector", password="field123"):
-    """Real field_staff session via the real password login."""
+    """Reuse a live, authenticated test session without relaxing login protection."""
+    import hashlib
+    tag = hashlib.sha256(f"{BASE_URL}:{TEST_DB}:{identifier}".encode()).hexdigest()[:16]
+    jar = os.path.join(tempfile.gettempdir(), f"openrental_field_cookie_{tag}.json")
     s = requests.Session()
+    if os.path.exists(jar):
+        try:
+            with open(jar) as f:
+                s.cookies.update(json.load(f))
+            trpc(s, "rolePermissions.getMyPermissions", method="GET")
+            return s
+        except (OSError, ValueError, TrpcError):
+            s = requests.Session()
     res = trpc(s, "fieldAuth.login",
                {"identifier": identifier, "password": password, "rememberMe": True})
     assert res, "field login returned empty"
+    with open(os.open(jar, os.O_WRONLY | os.O_CREAT | os.O_TRUNC, 0o600), "w") as f:
+        json.dump(s.cookies.get_dict(), f)
     return s
 
 

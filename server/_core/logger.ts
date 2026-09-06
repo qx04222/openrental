@@ -9,6 +9,7 @@ import type { Request, Response, NextFunction, ErrorRequestHandler } from "expre
 const isProduction = process.env.NODE_ENV === "production";
 
 export const requestContext = new AsyncLocalStorage<{ requestId: string }>();
+export const logObservation = new AsyncLocalStorage<{ warnings: number; errors: number }>();
 const secretKey = /password|secret|token|authorization|cookie|api.?key|signature|database.?url/i;
 
 export function redactLogValue(value: unknown, seen = new WeakSet<object>(), depth = 0): unknown {
@@ -32,6 +33,9 @@ export function safeRequestPath(path: string): string {
 }
 
 function formatMessage(level: string, message: string, meta?: Record<string, unknown>) {
+  const observed = logObservation.getStore();
+  if (observed && level === "WARN") observed.warnings++;
+  if (observed && level === "ERROR") observed.errors++;
   return JSON.stringify({ timestamp: new Date().toISOString(), level,
     message: redactLogValue(message), requestId: requestContext.getStore()?.requestId,
     ...(meta ? { meta: redactLogValue(meta) } : {}) });

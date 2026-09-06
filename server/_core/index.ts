@@ -234,144 +234,21 @@ async function startServer() {
     });
   }
 
-  // Cron jobs — catalog sync removed (TerraX integration retired). The
-  // catalog_cache table is now a local-only registry; admin CRUD only.
+  // Observe each handler and serialize same-job execution across processes.
   try {
-    const cron = await import("node-cron");
-    const cronTimezone = process.env.CRON_TIMEZONE || process.env.TZ || APP_TIMEZONE;
-
-    // Stale session cleanup — every 5 minutes
-    // Closes login_sessions where lastActiveAt > 10 min ago and logoutAt is null
-    cron.default.schedule("*/5 * * * *", async () => {
-      try {
-        const { getDb } = await import("../db");
-        const { loginSessions } = await import("../../drizzle/schema");
-        const { isNull, lt, and, eq: drizzleEq } = await import("drizzle-orm");
-        const db = await getDb();
-        if (!db) return;
-
-        const staleThreshold = new Date(Date.now() - 10 * 60 * 1000); // 10 minutes ago
-        const staleRows = await db
-          .select({ id: loginSessions.id, loginAt: loginSessions.loginAt, lastActiveAt: loginSessions.lastActiveAt })
-          .from(loginSessions)
-          .where(and(isNull(loginSessions.logoutAt), lt(loginSessions.lastActiveAt, staleThreshold)));
-
-        for (const row of staleRows) {
-          const endTime = row.lastActiveAt || row.loginAt;
-          const dur = Math.round((endTime.getTime() - row.loginAt.getTime()) / 1000);
-          await db.update(loginSessions)
-            .set({ logoutAt: endTime, durationSeconds: dur })
-            .where(drizzleEq(loginSessions.id, row.id));
-        }
-
-        if (staleRows.length > 0) {
-          logger.info(`[Cron] Auto-closed ${staleRows.length} stale login session(s)`);
-        }
-      } catch (err) {
-        logger.warn("[Cron] Stale session cleanup failed", { error: err instanceof Error ? err.message : String(err) });
-      }
-    });
-    logger.info("[Cron] Stale session cleanup scheduled every 5 minutes");
-
-    // Durable rental lifecycle effects — retries only idempotent work. Effects
-    // with ambiguous delivery outcomes are moved to manual review instead of
-    // risking duplicate customer messages.
-    cron.default.schedule("*/5 * * * *", async () => {
-      try {
-        const { runRentalLifecycleEffectsCron } = await import("../jobs/rentalLifecycleEffectsCron");
-        await runRentalLifecycleEffectsCron();
-      } catch (err) {
-        logger.warn("[Cron] Rental lifecycle effect retry failed", {
-          error: err instanceof Error ? err.message : String(err),
-        });
-      }
-    }, { timezone: cronTimezone, noOverlap: true });
-    logger.info(`[Cron] Rental lifecycle effect retry scheduled every 5 minutes (${cronTimezone})`);
-
-    // Late fee estimation — daily at 03:30 the configured timezone
-    cron.default.schedule("30 3 * * *", async () => {
-      try {
-        const { runLateFeeCron } = await import("../jobs/lateFeeCron");
-        await runLateFeeCron();
-      } catch (err) {
-        logger.warn("[Cron] Late fee estimation failed", {
-          error: err instanceof Error ? err.message : String(err),
-        });
-      }
-    }, { timezone: cronTimezone, noOverlap: true });
-    logger.info(`[Cron] Late fee estimation scheduled for 3:30 AM daily (${cronTimezone})`);
-
-    // Overdue status flip — daily at 04:00 the configured timezone
-    cron.default.schedule("0 4 * * *", async () => {
-      try {
-        const { runOverdueCron } = await import("../jobs/overdueCron");
-        await runOverdueCron();
-      } catch (err) {
-        logger.warn("[Cron] Overdue status flip failed", {
-          error: err instanceof Error ? err.message : String(err),
-        });
-      }
-    }, { timezone: cronTimezone, noOverlap: true });
-    logger.info(`[Cron] Overdue status flip scheduled for 4:00 AM daily (${cronTimezone})`);
-
-    // Rolling-rental settlement — daily at 04:15 Toronto, after overdue state
-    // evaluation. The job is additionally protected by its disabled-by-default
-    // feature flag and deterministic invoice source keys.
-    cron.default.schedule("15 4 * * *", async () => {
-      try {
-        const { runRollingSettlementCron } = await import("../jobs/rollingSettlementCron");
-        await runRollingSettlementCron();
-      } catch (err) {
-        logger.warn("[Cron] Rolling rental settlement failed", {
-          error: err instanceof Error ? err.message : String(err),
-        });
-      }
-    }, { timezone: cronTimezone, noOverlap: true });
-    logger.info(`[Cron] Rolling rental settlement scheduled for 4:15 AM daily (${cronTimezone})`);
-
-    // Price version promotion — daily at 00:05 the configured timezone.
-    // Flips equipment_models cache to any price version whose effective_from
-    // has arrived (future-scheduled category price changes go live).
-    cron.default.schedule("5 0 * * *", async () => {
-      try {
-        const { runPromotePricesCron } = await import("../jobs/promotePricesCron");
-        await runPromotePricesCron();
-      } catch (err) {
-        logger.warn("[Cron] Price version promotion failed", {
-          error: err instanceof Error ? err.message : String(err),
-        });
-      }
-    }, { timezone: cronTimezone, noOverlap: true });
-    logger.info(`[Cron] Price version promotion scheduled for 00:05 daily (${cronTimezone})`);
-
-    // Rental reminders — daily at 09:00 Toronto.
-    // Sends "rental ends tomorrow", "1-day overdue", "invoice 7 days unpaid".
-    cron.default.schedule("0 9 * * *", async () => {
-      try {
-        const { runRentalReminderCron } = await import("../jobs/rentalReminderCron");
-        await runRentalReminderCron();
-      } catch (err) {
-        logger.warn("[Cron] Rental reminders failed", {
-          error: err instanceof Error ? err.message : String(err),
-        });
-      }
-    }, { timezone: cronTimezone, noOverlap: true });
-    logger.info(`[Cron] Rental reminders scheduled for 9:00 AM daily (${cronTimezone})`);
-
-    // Quotation expiry — daily at 04:00 local. Marks draft/sent quotes past
-    // their validUntil as expired (status-only; does not block ordering).
-    cron.default.schedule("0 4 * * *", async () => {
-      try {
-        const { runQuotationExpiryCron } = await import("../jobs/quotationExpiryCron");
-        await runQuotationExpiryCron();
-      } catch (err) {
-        logger.warn("[Cron] Quotation expiry failed", { error: err instanceof Error ? err.message : String(err) });
-      }
-    }, { timezone: cronTimezone, noOverlap: true });
-    logger.info(`[Cron] Quotation expiry scheduled for 4:00 AM daily (${cronTimezone})`);
-
+    const { registerScheduledJob } = await import("../services/scheduledJobs");
+    const zone = process.env.CRON_TIMEZONE || process.env.TZ || APP_TIMEZONE;
+    registerScheduledJob("session_cleanup", "*/5 * * * *", zone, async () => (await import("../jobs/staleSessionCleanup")).runStaleSessionCleanup());
+    registerScheduledJob("lifecycle_effects", "*/5 * * * *", zone, async () => (await import("../jobs/rentalLifecycleEffectsCron")).runRentalLifecycleEffectsCron());
+    registerScheduledJob("late_fees", "30 3 * * *", zone, async () => (await import("../jobs/lateFeeCron")).runLateFeeCron());
+    registerScheduledJob("overdue_status", "0 4 * * *", zone, async () => (await import("../jobs/overdueCron")).runOverdueCron());
+    registerScheduledJob("rolling_settlement", "15 4 * * *", zone, async () => (await import("../jobs/rollingSettlementCron")).runRollingSettlementCron());
+    registerScheduledJob("price_promotion", "5 0 * * *", zone, async () => (await import("../jobs/promotePricesCron")).runPromotePricesCron());
+    registerScheduledJob("rental_reminders", "0 9 * * *", zone, async () => (await import("../jobs/rentalReminderCron")).runRentalReminderCron());
+    registerScheduledJob("quotation_expiry", "0 4 * * *", zone, async () => (await import("../jobs/quotationExpiryCron")).runQuotationExpiryCron());
+    logger.info("jobs.registered", { count: 8, timezone: zone });
   } catch (error) {
-    logger.warn("Cron scheduling failed (non-critical)", { error: error instanceof Error ? error.message : String(error) });
+    logger.error("jobs.registration_failed", { error });
   }
 }
 

@@ -98,7 +98,7 @@ export async function runRentalReminderCron(now: Date = new Date()): Promise<voi
         if (!result.delivered) { skipped++; continue; }
         await recordDelivered("rental", r.id, "reminder_ending_soon", r.customerPhone);
         endingNotified++;
-      } catch { /* swallow per-row */ }
+      } catch { logger.warn("reminder.item_failed", { entityType: "rental", entityId: r.id, kind: "ending_soon" }); }
     }
   } catch (err) {
     logger.warn("[ReminderCron] ending-soon block failed", { error: err instanceof Error ? err.message : String(err) });
@@ -126,7 +126,7 @@ export async function runRentalReminderCron(now: Date = new Date()): Promise<voi
         if (!result.delivered) { skipped++; continue; }
         await recordDelivered("rental", r.id, "reminder_first_overdue", r.customerPhone);
         overdueNotified++;
-      } catch { /* swallow */ }
+      } catch { logger.warn("reminder.item_failed", { entityType: "rental", entityId: r.id, kind: "overdue" }); }
     }
   } catch (err) {
     logger.warn("[ReminderCron] overdue block failed", { error: err instanceof Error ? err.message : String(err) });
@@ -165,11 +165,12 @@ export async function runRentalReminderCron(now: Date = new Date()): Promise<voi
         if (!result.delivered) { skipped++; continue; }
         await recordDelivered("invoice", inv.id, "reminder_invoice_overdue_7d", row.customerPhone);
         invoiceNotified++;
-      } catch { /* swallow */ }
+      } catch { logger.warn("reminder.item_failed", { entityType: "invoice", entityId: inv.id, kind: "invoice_overdue" }); }
     }
   } catch (err) {
     logger.warn("[ReminderCron] invoice block failed", { error: err instanceof Error ? err.message : String(err) });
   }
 
+  if (skipped) logger.warn("reminder.delivery_not_confirmed", { count: skipped });
   logger.info("[ReminderCron] complete", { endingNotified, overdueNotified, invoiceNotified, skipped });
 }

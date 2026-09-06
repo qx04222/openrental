@@ -47,9 +47,11 @@ reversing financial data. Do not restore a database backup over newer customer
 transactions without reconciling them. Use a separate database to prove backup
 restore before any future schema migration.
 
-Run one application replica until all cron jobs have cross-instance locking.
-`noOverlap` prevents overlap within a process; it does not guarantee exactly-once
-execution across different machines. Side-effect retries retain their existing
+The 2.0 scheduler holds a PostgreSQL session advisory lock on a reserved
+connection for each job, in addition to local `noOverlap`. Two-process
+contention and exception recovery are tested. Keep the deployment at one
+replica until broader scaling/load acceptance; locks do not promise exactly-once
+execution after connection loss or a crash. Side-effect retries retain their existing
 ledger and must not be inferred successful from a cron tick.
 
 ## Automatic maintenance

@@ -64,6 +64,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   };
 
   const hasPerm = (permission?: string): boolean => {
+    if (permission === "planning") return hasPerm("fleet") && hasPerm("rentals");
     if (!permission) return true; // No permission required
     if (permission === "super_admin") return isSuperAdmin;
     if (isSuperAdmin) return true;
@@ -82,6 +83,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const allMenuItems: MenuItem[] = [
     { icon: LayoutDashboard, label: t("sidebar.dashboard"), path: "/admin" },
     { label: t("sidebar.rentals"), items: [
+      { icon: CalendarClock, label: t("planning.title"), path: "/admin/planning", permission: "planning" },
       { icon: FileText, label: t("sidebar.rentalManagement"), path: "/admin/rental-management", permission: "rentals", queue: "held_deposit" },
       { icon: Truck, label: t("sidebar.dispatch"), path: "/admin/dispatch", permission: "dispatch", queue: "dispatch_order" },
       { icon: ClipboardCheck, label: t("sidebar.inspections"), path: "/admin/inspections", permission: "inspections" },
@@ -116,6 +118,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
     ]},
     // System + Settings long tail (11 pages) consolidated into one hub entry to
     // keep the sidebar short — the hub renders a permission-filtered card menu.
+    { icon: ListChecks, label: t("ops.title"), path: "/admin/operations", permission: "super_admin" },
     { icon: Settings, label: t("sidebar.systemSettings"), path: "/admin/system-settings", permission: "settings" },
   ];
 
